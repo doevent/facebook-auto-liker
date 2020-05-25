@@ -1,4 +1,4 @@
-# facebook
+# Facebook Auto Liker
 Facebook likes feeds, likes stories, send message birthday
 
 ### Установка
@@ -14,16 +14,16 @@ Windows:
 ```
 downloads .exe files
 ```
-### Compatibilty
+### Совместимость
 * Python 3.7+
 * Selenium 3.4.0+
 * Chrome 81.1+
 
-## Authors
+## Автор
 
 * **Skobeev Maksim** - [DoEvent](https://github.com/doevent/)
 
 
-## License
+## Лицензия
 
 This project is licensed under the MIT License
