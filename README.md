@@ -8,9 +8,6 @@ Facebook likes feeds, likes stories, send message birthday
  Python: 
 ```
 pip install selenium
-pip install pyautogui
-pip install pywin32
-pip install opencv-python
 ```
 Windows:
 ```
@@ -19,7 +16,10 @@ downloads .exe files
 ### Совместимость
 * Python 3.7+
 * Selenium 3.4.0+
-* Chrome 81.1+
+* Chrome driver 84.0.4147.105
+* Chrome 84.0+ (for other version: [download](https://chromedriver.chromium.org/))
+* Русский язык Facebook
+
 
 ## Автор
 
