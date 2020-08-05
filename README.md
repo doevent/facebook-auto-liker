@@ -12,7 +12,6 @@ Facebook likes feeds, likes stories, send message birthday.
 * Информирование через телеграм бота
 
 ### Установка
-
  Python: 
 ```
 pip install selenium
@@ -21,8 +20,10 @@ Windows:
 ```
 downloads .exe files
 ```
-### Настройка
-Настройка осуществляется без графического интерфейса в тестовом формате путем редактивания файла setting.ini через текстовый редактор или во встроенном текстовым редакторе.
+## Настройка
+
+#### Настройка параметров
+Настройка осуществляется без графического интерфейса в тестовом формате путем редактивания файла **setting.ini** через текстовый редактор или во встроенном текстовым редакторе.
 
 chrome_user - имя пользователя в браузере, если используется. Пример:
 ```
@@ -48,7 +49,7 @@ token = 1387036342:AAGm4QWD5vUjH7FgQbejmz1jelfvh1WUDQI
 ```
 botid = 1251879074
 ```
-### Настройки планировщика 
+#### Настройки планировщика 
 schedule_birthday - время поздравлений в планировщике. Пример:
 ```
 schedule_birthday = 10:00
@@ -61,20 +62,29 @@ schedule_like_feed - время лайков новостной ленты в п
 ```
 schedule_like_feed = 15:00
 ```
+#### Настройки поздравлений с днем рождения 
+Настройка осуществляется путем редактирования файла **birthday.txt**. Одно поздравление в одну строку, без переносов. Пример:
+```
+Поздравляю с днем рождения!
+Мои поздравления с днем рождения!
+Поздравляю с днюшечкой!
+Мои поздравления с днюшечкой
+Поздравляю с Днем Рождения!
+С Днем Рождения тебя!
+Прими мои поздравления с днем рождения!
+```
 
 ### Совместимость
 * Python 3.7+
 * Selenium 3.4.0+
-* Chrome driver current test release 84.0.4147.105
+* Chrome driver current test release 84.0.4147.30
 * Chrome current test release 84.0+ (for other version: [download driver](https://chromedriver.chromium.org/))
 * Option ONLY Russian language facebook interface (Работает только на русскоязычном интерфейсе)
 * TODO English version
 
 ## Автор
-
 * **Skobeev Maksim** - [DoEvent](https://github.com/doevent/)
 
 
 ## Лицензия
-
 This project is licensed under the [MIT](https://en.wikipedia.org/wiki/MIT_License) License
