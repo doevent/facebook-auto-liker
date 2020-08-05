@@ -2,6 +2,7 @@
 
 ### version 0.3.1
 Facebook likes feeds, likes stories, send message birthday.
+
 Автоматический лайкер новостной ленты, историй и отправка поздравлений с днем рождения.
 
 ### Функции
@@ -77,8 +78,8 @@ schedule_like_feed = 15:00
 ### Совместимость
 * Python 3.7+
 * Selenium 3.4.0+
-* Chrome driver current test release 84.0.4147.30
-* Chrome current test release 84.0+ (for other version: [download driver](https://chromedriver.chromium.org/))
+* Chrome driver current test release 84.0.4147.30 (for other version: [download driver](https://chromedriver.chromium.org/))
+* Chrome current test release 84.0+ (chrome://settings/help)
 * Option ONLY Russian language facebook interface (Работает только на русскоязычном интерфейсе)
 * TODO English version
 
