@@ -16,6 +16,8 @@ Facebook likes feeds, likes stories, send message birthday.
  Python: 
 ```
 pip install selenium
+pip install pyTelegramBotAPI
+pip install schedule
 ```
 Windows:
 ```
