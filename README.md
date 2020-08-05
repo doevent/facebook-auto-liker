@@ -16,9 +16,9 @@ downloads .exe files
 ### Совместимость
 * Python 3.7+
 * Selenium 3.4.0+
-* Chrome driver 84.0.4147.105
-* Chrome 84.0+ (for other version: [download](https://chromedriver.chromium.org/))
-* Русский язык Facebook
+* Chrome driver current test release 84.0.4147.105
+* Chrome current test release 84.0+ (for other version: [download](https://chromedriver.chromium.org/))
+* Option Russian language facebook interface
 
 
 ## Автор
