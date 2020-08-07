@@ -59,7 +59,7 @@ except Exception as e:
     logging.exception("Ошибка загрузки INI")
     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка загрузки INI")
 
-if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) < 15 and len(BotID) < 5:
+if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
     bot = telebot.TeleBot(API_TOKEN)
 
 # Проверка версии
@@ -94,7 +94,7 @@ size = 0 # размер окна браузер
 position = 0 # позиция окна браузера
 print (f"\nРасписание планировщика:\nПоздравления: {schedule_birthday} ч:м\nЛайки сториес: {schedule_stories1} ч:м\nЛайки сториес: {schedule_stories2} ч:м\nЛайки сториес: {schedule_stories3} ч:м\nЛайки ленты: {schedule_like_feed1} ч:м\n\nТекущая версия: {version}\nПоследняя версия: {upd_version}")
 print (f"\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Режим ожидания...\n")
-if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) < 15 and len(BotID) < 5:
+if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
     bot.send_message(BotID, f"<b>Start FACEBOOK Bot</b>\n\nРасписание планировщика:\nПоздравления: <b>{schedule_birthday}</b> ч:м\nЛайки сториес: <b>{schedule_stories1}</b> ч:м\nЛайки сториес: <b>{schedule_stories2}</b> ч:м\nЛайки сториес: <b>{schedule_stories3}</b> ч:м\nЛайки ленты: {schedule_like_feed1} ч:м\n\nТекущая версия: <b>{version}</b>\nПоследняя версия: <b>{upd_version}</b>\nЛог: {log_filename}\n", parse_mode='Html')
 
 
@@ -148,7 +148,7 @@ def start_browser():
     time.sleep(1)
     ActionChains(driver).send_keys(Keys.ESCAPE).perform() #жмем esc чтобы убрать всплывающие окна
     ActionChains(driver).reset_actions()
-    if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) < 15 and len(BotID) < 5:
+    if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
         bot.send_message(BotID, f"<b>Создано новое окно браузера.</b>\n{driver.title}\nВерсия Chrome: {driver.capabilities['browserVersion']}\nWindow size: width = {size['width']}px, height = {size['height']}px,\nx = {position['x']}, y = {position['y']}", parse_mode='Html')
     logging.info("Создано окно браузера.")
 
@@ -159,7 +159,7 @@ def start_birthday_fb():
 
     start_browser()
     logging.info('Старт сценария поздравлений с днем рождения')
-    if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) < 15 and len(BotID) < 5:
+    if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
         bot.send_message(BotID, "<b>Старт</b> сценария поздравлений с днем рождения.", parse_mode='Html')
     
 
@@ -241,7 +241,7 @@ def birthday_message():
             logging.info(f'Отправлено поздравлений на страницу: {num_msg} из {len_count}')
             print (f"\n\nОправлено сообщений на страницу: {num_msg} из {len_count}\n\nРасписание планировщика:\nПоздравления: {schedule_birthday} ч:м\nЛайки сториес: {schedule_stories1} ч:м\nЛайки сториес: {schedule_stories2} ч:м\nЛайки сториес: {schedule_stories3} ч:м\nЛайки ленты: {schedule_like_feed1} ч:м")
             print (f"\n\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Режим ожидания...\n")
-            if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) < 15 and len(BotID) < 5:
+            if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
                 bot.send_message(BotID, f"<b>Конец</b> функции BIRTHDAY.\n\nОправлено на страницу: <b>{num_msg}</b> из <b>{len_count}</b>", parse_mode='Html')
             f.close()
             try:
@@ -267,7 +267,7 @@ def start_stories_fb():
     start_browser() # создаем окно
     logging.info('Старт сценария лайков сториес.')
     
-    if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) < 15 and len(BotID) < 5:
+    if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
         bot.send_message(BotID, "Старт сценария лайков сториес.")
 
     driver.get("https://www.facebook.com/")
@@ -542,7 +542,7 @@ def stories_likes():
                 driver.quit()
                 print (f"\n\nПоставлено лайков: {count_like}\nПоставленно сердечек: {count_super}\nПоставлено Мы вместе: {count_together}\nПролистано: {count_next}\nВсего циклов: {stories + 1}\n\nРасписание планировщика:\nПоздравления: {schedule_birthday} ч:м\nЛайки сториес: {schedule_stories1} ч:м\nЛайки сториес: {schedule_stories2} ч:м\nЛайки сториес: {schedule_stories3} ч:м\nЛайки ленты: {schedule_like_feed1} ч:м\n\n")
                 print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Режим ожидания...\n")
-                if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) < 15 and len(BotID) < 5:
+                if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
                     bot.send_message(BotID, f"Конец функции LIKE STORIES:\n\nПоставлено лайков: {count_like}\nПоставленно сердечек: {count_super}\nПоставлено Мы вместе: {count_together}\nПролистано: {count_next}\nВсего циклов: {stories + 1}")
                 
                 
@@ -556,7 +556,7 @@ def stories_likes():
 # Функция начала лайков в ленте
 def start_feed_likes():
     logging.info("Старт сценария лайков ленты новостей.")
-    if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) < 15 and len(BotID) < 5:
+    if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
         bot.send_message(BotID, "<b>Старт</b> сценария лайков ленты новостей.", parse_mode='Html')
 
     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Старт функции LIKES FEED...")
@@ -625,7 +625,7 @@ def feed_likes():
 
             logging.info("Цикл лайков ленты закончен")
             try:
-                if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) < 15 and len(BotID) < 5:
+                if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
                     bot.send_message(BotID, f"<b>Конец</b> функции <b>ЛАЙКИ ЛЕНТЫ НОВОСТЕЙ</b>:\nНравится: <b>{count_like}</b>\nСупер: <b>{count_super}</b>\nМы вместе: <b>{count_together}</b>\nСделано циклов: <b>{x_all}</b> из <b>{feed_set - 1}</b>", parse_mode='Html')
             except Exception as e:
                 print (e)
