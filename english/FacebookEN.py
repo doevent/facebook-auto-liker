@@ -26,7 +26,7 @@ import tkinter as tk # windows
 import argparse # command line
 
 
-log_filename = f'fb_log\\facebook_select_ru-{datetime.datetime.now().strftime("%d-%m-%Y")}.log'
+log_filename = f'fb_log\\facebook_select_en-{datetime.datetime.now().strftime("%d-%m-%Y")}.log'
 logging.basicConfig(filename=log_filename, level=logging.INFO, filemode='a', format=' %(asctime)s: %(name)s - %(levelname)s - %(message)s')
 print(log_filename)
 logging.info("==============================================================")
