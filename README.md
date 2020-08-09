@@ -1,4 +1,4 @@
-# Facebook Auto Liker
+# Facebook Auto Liker (English, Russian)
 
 ### version 0.3.1
 Facebook likes feeds, likes stories, send message birthday.
@@ -107,8 +107,8 @@ FacebookRU.exe birthday
 * Selenium 3.4.0+
 * Chrome driver current test release 84.0.4147.30 (for other version: [download driver](https://chromedriver.chromium.org/))
 * Chrome current test release 84.0+ (chrome://settings/help)
-* Option ONLY Russian language facebook interface (Работает только на русскоязычном интерфейсе)
-* TODO English version
+* Russian version
+* English version
 
 ## Автор
 * **Skobeev Maksim** - [DoEvent](https://github.com/doevent/)
