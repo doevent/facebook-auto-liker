@@ -261,6 +261,7 @@ def start_stories_fb():
     except Exception as e:
         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button See all stories  NOT FOUND.\n{e}")
         logging.exception("Button See all stories  NOT FOUND.")
+        driver.quit()
 
 def stories_likes():
  
@@ -424,40 +425,53 @@ def stories_likes():
             # NEXT
             try:
                 wait = WebDriverWait(driver, 3)
-                wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '''[aria-label='Next bucket button']'''))).click()
-                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Next bucket button")
+                wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[aria-label='Next Bucket Button']"))).click()
+                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Next Bucket Button")
                 time.sleep(random.randrange(1,2))
                 next_refrash = 0 # clear count error
             except Exception as e:
                 try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '''[aria-label='Next card button']'''))).click()
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Next card button")
+                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[aria-label='Next Card Button']"))).click()
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Next Card Button")
                     time.sleep(random.randrange(1,2))
                     next_refrash = 0 # clear count error
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Not found NEXT button. Refresh...")
-                    logging.warning("Блок Сториес. Не найдены кнопки NEXT. Останавливаем цикл.")
-                    
-                    next_refrash = next_refrash + 1
-                    
-                    if next_refrash == 3: # if repeat error no button NEXT - quit browser
-                        logging.info("Not found NEXT button. Quit.")
-                        driver.quit()
-                        break
-                    
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Refresh...")
-                    driver.refresh()
-                    time.sleep(random.randrange(10,15))
-                    ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.RETURN).perform()
-                    time.sleep(random.randrange(4,8))
-                    try: # Mute
-                        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Mute"]'))).click()
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Mute")
-                    except TimeoutException as e:
-                        print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Error Mute... \n{e}")
-                        logging.info("Error mute...")
-                    time.sleep(random.randrange(2,4))
-                    logging.info('Refresh browser. No button NEXT')
+                except Exception as e:
+                    try:
+                        wait = WebDriverWait(driver, 3)
+                        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[aria-label='Next bucket Button']"))).click()
+                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Next bucket button")
+                        time.sleep(random.randrange(1,2))
+                        next_refrash = 0 # clear count error
+                    except Exception as e:
+                        try:
+                            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[aria-label='Next card button']"))).click()
+                            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Next card button")
+                            time.sleep(random.randrange(1,2))
+                            next_refrash = 0 # clear count error
+                        except TimeoutException as e:
+                            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Not found NEXT button. Refresh...")
+                            logging.warning("Not found NEXT button. Refresh.. ")
+                            
+                            next_refrash = next_refrash + 1
+                            
+                            if next_refrash == 3: # if repeat error no button NEXT - quit browser
+                                logging.info("Not found NEXT button. Quit.")
+                                driver.quit()
+                                break
+                            
+                            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Refresh...")
+                            driver.refresh()
+                            time.sleep(random.randrange(10,15))
+                            ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.RETURN).perform()
+                            time.sleep(random.randrange(4,8))
+                            try: # Mute
+                                wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Mute"]'))).click()
+                                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Mute")
+                            except TimeoutException as e:
+                                print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Error Mute... \n{e}")
+                                logging.info("Error mute...")
+                            time.sleep(random.randrange(2,4))
+                            logging.info('Refresh browser. No button NEXT')
                     
             
             count_next = count_next + 1
