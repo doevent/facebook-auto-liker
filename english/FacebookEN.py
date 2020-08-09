@@ -178,7 +178,7 @@ def birthday_message():
     time.sleep(random.randrange(18,27))
 
     try:
-        with open("birthday.txt", "r", encoding="utf-8") as f:
+        with open("birthday_en.txt", "r", encoding="utf-8") as f:
             birthday = f.readlines()
             
             count_post = driver.find_elements_by_css_selector("[method='POST']")
