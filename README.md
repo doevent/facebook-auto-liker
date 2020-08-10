@@ -5,15 +5,21 @@ Facebook likes feeds, likes stories, send message birthday.
 
 Автоматический лайкер новостной ленты, историй и отправка поздравлений с днем рождения.
 
-### Функции
-* Лайки новостной ленты
+### Функции RU
+* Лайки ленты друзей
 * Лайки историй
 * Поздравления с днем рождения
 * Встроенный планировщик
 * Информирование через телеграм бота
 * Запуск из командной строки (например для запуска через планировщик)
 
-### Установка
+### Functions EN
+* Likes friends feed
+* Likes stories
+* Send Happy Birthday Messages
+* Run from the command line
+
+### Install
  Python: 
 ```
 pip install selenium
@@ -88,20 +94,20 @@ schedule_like_feed = 15:00
 #### Командная строка
 Лайки новостной ленты:
 ```
-FacebookRU.py feed
+python FacebookRU.py feed
 FacebookRU.exe feed
 ```
 Лайки историй:
 ```
-FacebookRU.py story
+python FacebookRU.py story
 FacebookRU.exe story
 ```
 Поздравления с днем рождения:
 ```
-FacebookRU.py birthday
+python FacebookRU.py birthday
 FacebookRU.exe birthday
 ```
-### Совместимость
+### Compatibility
 * Windows 10, 2019
 * Python 3.7+
 * Selenium 3.4.0+
@@ -110,9 +116,9 @@ FacebookRU.exe birthday
 * Russian version
 * English version
 
-## Автор
+## Author
 * **Skobeev Maksim** - [DoEvent](https://github.com/doevent/)
 
 
-## Лицензия
+## License
 This project is licensed under the [MIT](https://en.wikipedia.org/wiki/MIT_License) License
