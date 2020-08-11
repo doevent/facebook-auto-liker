@@ -1,5 +1,5 @@
 # Facebook Auto Liker (English, Russian)
-
+![alt text](win.jpg)
 ### version 0.3.1
 Facebook likes feeds, likes stories, send message birthday.
 
