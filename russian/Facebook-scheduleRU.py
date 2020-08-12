@@ -330,14 +330,14 @@ def stories_likes():
     try: # Отключаем звук на компе
         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Выключить звук"]'))).click()
         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Звук выключен")
-    except TimeoutException as e:
+    except Exception as e:
         print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка кнопки вкл\выкл звука... \n{e}")
-        logging.info("Ошибка кнопки вкл\выкл звука...")
+        logging.info("Ошибка кнопки вкл\выкл звука...\n{e}")
         
     try:
         # Цикл лайков
         for stories in range(0, stories_set):
-            
+            wait = WebDriverWait(driver, 3)
             rnd_like = random.randrange(1,9)
             # генерация разных сценариев лайков
             if rnd_like == 1:
@@ -345,8 +345,8 @@ def stories_likes():
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
                 except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.")
-                    logging.info('Like button not found')
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.\n{e}")
+                    logging.info(f'Like button not \n{e}')
                 else:
                     count_like = count_like + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
@@ -355,9 +355,9 @@ def stories_likes():
                 #Одинарный супер
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.")
-                    logging.info("Блок Сториес. Не найдена кнопка SUPER.")
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
+                    logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
                 else:
                     count_super = count_super + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - СУПЕР...")
@@ -367,9 +367,9 @@ def stories_likes():
                 for mkmk in range(0,random.randrange(2,5)):
                     try:
                         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                    except TimeoutException as e:
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.")
-                        logging.info('Like button not found')
+                    except Exception as e:
+                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.\n{e}")
+                        logging.info(f'Like button not found\n{e}')
                     else:
                         count_like = count_like + 1
                         time.sleep(random.randrange(0,3))
@@ -380,9 +380,9 @@ def stories_likes():
                 for mkmk in range(0, random.randrange(2,5)):
                     try:
                         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                    except TimeoutException as e:
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.")
-                        logging.info("Блок Сториес. Не найдена кнопка SUPER.")
+                    except Exception as e:
+                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
+                        logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
                     else:
                         time.sleep(random.randrange(0,3))
                         count_super = count_super + 1
@@ -392,9 +392,9 @@ def stories_likes():
                 # Лайк + Супер
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.")
-                    logging.info('Like button not found')
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.\n{e}")
+                    logging.info(f'Like button not found\n{e}')
                 else:
                     count_like = count_like + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
@@ -402,9 +402,9 @@ def stories_likes():
                 
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.")
-                    logging.info("Блок Сториес. Не найдена кнопка SUPER.")
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
+                    logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
                 else:
                     count_super = count_super + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - СУПЕР...")
@@ -413,9 +413,9 @@ def stories_likes():
                 # Супер + Лайк
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.")
-                    logging.info("Блок Сториес. Не найдена кнопка SUPER.")
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
+                    logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
                 else:
                     count_super = count_super + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - СУПЕР...")
@@ -423,9 +423,9 @@ def stories_likes():
                 
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.")
-                    logging.info('Like button not found')
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.\n{e}")
+                    logging.info(f'Like button not found\n{e}')
                 else:
                     count_like = count_like + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
@@ -435,9 +435,9 @@ def stories_likes():
                 # Лайк, супер, мы вместе
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except TimeoutException as e:
+                except Exception as e:
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.")
-                    logging.info('Like button not found')
+                    logging.info(f'Like button not found\n{e}')
                 else:
                     count_like = count_like + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
@@ -445,9 +445,9 @@ def stories_likes():
                 
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except TimeoutException as e:
+                except Exception as e:
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.")
-                    logging.info("Блок Сториес. Не найдена кнопка SUPER.")
+                    logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
                 else:
                     count_super = count_super + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - СУПЕР...")
@@ -455,9 +455,9 @@ def stories_likes():
                 
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="16"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка МЫ ВМЕСТЕ не найдена.")
-                    logging.info("Блок Сториес. Не найдена кнопка МЫ ВМЕСТЕ.")
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка МЫ ВМЕСТЕ не найдена.\n{e}")
+                    logging.info(f"Блок Сториес. Не найдена кнопка МЫ ВМЕСТЕ.\n{e}")
                 else:
                     count_together = count_together + 1 # счетчик мы вместе
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - МЫ ВМЕСТЕ...")
@@ -467,9 +467,9 @@ def stories_likes():
                 # Мы вместе
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="16"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка МЫ ВМЕСТЕ не найдена.")
-                    logging.info("Блок Сториес. Не найдена кнопка МЫ ВМЕСТЕ.")
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка МЫ ВМЕСТЕ не найдена.\n{e}")
+                    logging.info(f"Блок Сториес. Не найдена кнопка МЫ ВМЕСТЕ.\n{e}")
                 else:
                     count_together = count_together + 1 # счетчик мы вместе
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - МЫ ВМЕСТЕ..")
@@ -489,9 +489,9 @@ def stories_likes():
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Кнопка: Следующая открытка")
                     time.sleep(random.randrange(1,2))
                     next_refrash = 0 # clear count error
-                except TimeoutException as e:
+                except Exception as e:
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Не найдены обе кнопки NEXT. Обновление...")
-                    logging.warning("Блок Сториес. Не найдены кнопки NEXT. Останавливаем цикл.")
+                    logging.warning(f"Блок Сториес. Не найдены кнопки NEXT. Останавливаем цикл.\n{e}")
                     
                     next_refrash = next_refrash + 1
                     
@@ -509,9 +509,9 @@ def stories_likes():
                     try: # Отключаем звук на компе
                         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Выключить звук"]'))).click()
                         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Звук выключен")
-                    except TimeoutException as e:
-                        print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка кнопки вкл\выкл звука... \n{e}")
-                        logging.info("Ошибка кнопки вкл\выкл звука...")
+                    except Exception as e:
+                        print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка кнопки вкл\выкл звука...\n{e}")
+                        logging.info(f"Ошибка кнопки вкл\выкл звука...\n{e}")
                     time.sleep(random.randrange(2,4))
                     logging.info('Refresh browser. No button NEXT')
                     
