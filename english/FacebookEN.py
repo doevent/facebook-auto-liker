@@ -281,21 +281,21 @@ def stories_likes():
     try: # Sound off
         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Mute"]'))).click()
         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Mute")
-    except TimeoutException as e:
+    except Exception as e:
         print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Error Mute... \n{e}")
-        logging.info("Error Mute...")
+        logging.info("Error Mute...\n{e}")
         
     try:
         for stories in range(0, stories_set):
-            
+            wait = WebDriverWait(driver, 3)
             rnd_like = random.randrange(1,9)
             if rnd_like == 1:
                 # one click like
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button LIKE not found.")
-                    logging.info('Like button not found')
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button LIKE not found.\n{e}")
+                    logging.info(f'Like button not found\n{e}')
                 else:
                     count_like = count_like + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Like...")
@@ -304,9 +304,9 @@ def stories_likes():
                 # one click love
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Love button not found.")
-                    logging.info("Love button not found.")
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Love button not found.\n{e}")
+                    logging.info(f"Love button not found.\n{e}")
                 else:
                     count_super = count_super + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Love...")
@@ -316,9 +316,9 @@ def stories_likes():
                 for mkmk in range(0,random.randrange(2,5)):
                     try:
                         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                    except TimeoutException as e:
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button LIKE not found.")
-                        logging.info('Like button not found')
+                    except Exception as e:
+                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button LIKE not found.\n{e}")
+                        logging.info(f'Like button not found\n{e}')
                     else:
                         count_like = count_like + 1
                         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Like...")
@@ -328,9 +328,9 @@ def stories_likes():
                 for mkmk in range(0, random.randrange(2,5)):
                     try:
                         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                    except TimeoutException as e:
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Love button not found.")
-                        logging.info("Love button not found.")
+                    except Exception as e:
+                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Love button not found.\n{e}")
+                        logging.info(f"Love button not found.\n{e}")
                     else:
                         time.sleep(random.randrange(0,3))
                         count_super = count_super + 1
@@ -339,9 +339,9 @@ def stories_likes():
             elif rnd_like == 5:
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button LIKE not found.")
-                    logging.info('Like button not found')
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button LIKE not found.\n{e}")
+                    logging.info(f'Like button not found\n{e}')
                 else:
                     count_like = count_like + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Like...")
@@ -349,9 +349,9 @@ def stories_likes():
                 
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Love button not found.")
-                    logging.info("Love button not found.")
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Love button not found.\n{e}")
+                    logging.info(f"Love button not found.\n{e}")
                 else:
                     count_super = count_super + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Love...")
@@ -359,9 +359,9 @@ def stories_likes():
             elif rnd_like == 6:
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Love button not found.")
-                    logging.info("Love button not found.")
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Love button not found.\n{e}")
+                    logging.info(f"Love button not found.\n{e}")
                 else:
                     count_super = count_super + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Love...")
@@ -370,9 +370,9 @@ def stories_likes():
 
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button LIKE not found.")
-                    logging.info('Like button not found')
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button LIKE not found.\n{e}")
+                    logging.info(f'Like button not found\n{e}')
                 else:
                     count_like = count_like + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Like...")
@@ -380,9 +380,9 @@ def stories_likes():
             elif rnd_like == 7:
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button LIKE not found.")
-                    logging.info('Like button not found')
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Button LIKE not found.\n{e}")
+                    logging.info(f'Like button not found\n{e}')
                 else:
                     count_like = count_like + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Like...")
@@ -390,9 +390,9 @@ def stories_likes():
                 
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Love button not found.")
-                    logging.info("Love button not found.")
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Love button not found.\n{e}")
+                    logging.info(f"Love button not found.\n{e}")
                 else:
                     count_super = count_super + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Love...")
@@ -400,9 +400,9 @@ def stories_likes():
                 
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="16"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Care button not found.")
-                    logging.info("Care button not found.")
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Care button not found.\n{e}")
+                    logging.info(f"Care button not found.\n{e}")
                 else:
                     count_together = count_together + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Care...")
@@ -412,9 +412,9 @@ def stories_likes():
             elif rnd_like == 8:
                 try:
                     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="16"]'))).click()
-                except TimeoutException as e:
+                except Exception as e:
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Care button not found.")
-                    logging.info("Care button not found.")
+                    logging.info(f"Care button not found.\n{e}")
                 else:
                     count_together = count_together + 1
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Care..")
@@ -444,9 +444,9 @@ def stories_likes():
                             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Next card button")
                             time.sleep(random.randrange(1,2))
                             next_refrash = 0 # clear count error
-                        except TimeoutException as e:
+                        except Exception as e:
                             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Not found NEXT button. Refresh...")
-                            logging.warning("Not found NEXT button. Refresh.. ")
+                            logging.warning("Not found NEXT button. Refresh..\n{e}")
                             
                             next_refrash = next_refrash + 1
                             
@@ -464,9 +464,9 @@ def stories_likes():
                             try: # Mute
                                 wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Mute"]'))).click()
                                 print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Mute")
-                            except TimeoutException as e:
+                            except Exception as e:
                                 print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Error Mute... \n{e}")
-                                logging.info("Error mute...")
+                                logging.info("Error mute...\n{e}")
                             time.sleep(random.randrange(2,4))
                             logging.info('Refresh browser. No button NEXT')
                     
