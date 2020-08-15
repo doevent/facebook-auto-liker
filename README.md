@@ -1,6 +1,6 @@
 # Facebook Auto Liker (English, Russian)
 ![alt text](win.jpg)
-### version v0.3.1-beta.3
+### version v0.3.1-beta.4
 Facebook likes feeds, likes stories, send message birthday.
 
 Автоматический лайкер новостной ленты, историй и отправка поздравлений с днем рождения.
