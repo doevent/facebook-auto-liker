@@ -113,8 +113,8 @@ FacebookRU.exe birthday
 * Selenium 3.4.0+
 * Chrome driver current test release 84.0.4147.30 (for other version: [download driver](https://chromedriver.chromium.org/))
 * Chrome current test release 84.0+ (chrome://settings/help)
-* Russian version
-* English version
+* Facebook language: Russian, English
+* Switch to New Facebook design
 
 ## Author
 * **Skobeev Maksim** - [DoEvent](https://github.com/doevent/)
