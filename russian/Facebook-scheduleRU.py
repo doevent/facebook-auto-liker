@@ -81,14 +81,6 @@ except Exception as e:
     logging.exception('Ошибка проверки версии')
 
 
-#настройки создания окна хрома
-options = webdriver.ChromeOptions() 
-options.add_argument("disable-infobars")
-options.add_experimental_option("excludeSwitches", ["enable-automation"])
-options.add_experimental_option('useAutomationExtension', False)
-options.add_argument(f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data\\{chrome_user}")
-
-
 driver = 0 # селениум
 size = 0 # размер окна браузер
 position = 0 # позиция окна браузера
@@ -100,10 +92,17 @@ if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
 
 #Функция Создания окна браузера
 def start_browser():
-    global action
     global driver
     global size
     global position
+    
+    #настройки создания окна хрома
+    options = webdriver.ChromeOptions() 
+    options.add_argument("disable-infobars")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
+    options.add_argument(f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data\\{chrome_user}")
+
     try:
         # создаем пустое окно браузера
         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Создаем окно браузера...")
@@ -135,7 +134,7 @@ def start_browser():
     driver.execute_cdp_cmd("Network.setExtraHTTPHeaders", {"headers": {"User-Agent": "browser1"}})
     # Конец масикровки
     driver.set_window_rect(10,10, width_set, height_set)
-    driver.get("chrome://settings/help")
+    driver.get("https://facebook.com/")
     time.sleep(3)
     
     size = driver.get_window_size()
@@ -152,6 +151,19 @@ def start_browser():
         bot.send_message(BotID, f"<b>Создано новое окно браузера.</b>\n{driver.title}\nВерсия Chrome: {driver.capabilities['browserVersion']}\nWindow size: width = {size['width']}px, height = {size['height']}px,\nx = {position['x']}, y = {position['y']}", parse_mode='Html')
     logging.info("Создано окно браузера.")
 
+    try:
+        #закрываем вкладки
+        driver.implicitly_wait(7)
+        count_close = driver.find_elements_by_css_selector('[aria-label="Закрыть вкладку"]')
+        print(f'Закрыть вкладку: {len(count_close)}')
+        for send_close in count_close:
+            send_close.click()
+            try:
+                driver.find_element_by_css_selector('[aria-label="ОК"]').click()
+            except Exception as e:
+                logging.debug(e)
+    except Exception as e:
+        logging.debug(e)
 #-----------------------------------------------------------
 # Старт функции поздравлений
 def start_birthday_fb():
@@ -199,14 +211,14 @@ def birthday_message():
             birthday = f.readlines()
             
             count_post = driver.find_elements_by_css_selector("[method='POST']")
-            len_count = len(count_post)
+            len_count = len(count_post)-1
             print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено полей для поздавлений: {len_count}")
             
             logging.info(f'Найдено полей для поздавлений: {len_count}')
             num_msg = 0 #счетчик отправленных сообщений
             
             for send_msg in range(0, len_count):
-                if len_count == 0:
+                if len_count <= 0:
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Нет полей поздравлений №: {num_msg}")
                     logging.info(f'Нет полей поздравлений №: {num_msg}')
                     break
@@ -215,29 +227,38 @@ def birthday_message():
                     logging.info(f'Лимит поздравлений №: {num_msg}')
                     break
 
-                try:
-                    cmess = driver.find_elements_by_css_selector("[method='POST']")
-                    cmess[0].location_once_scrolled_into_view
-                    txt = str(random.choice(birthday).replace("\n", ""))
-                    ActionChains(driver).click(cmess[0]).send_keys_to_element(cmess[0],txt, Keys.ENTER).perform()
-                    time.sleep(random.randrange(10,15))
-                    # driver.execute_script("window.scrollBy(0,100)")
-                    num_msg = num_msg + 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравление №: {num_msg}")
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Текст: {txt}")
-                    time.sleep(random.randrange(4,7))
-                    ActionChains(driver).reset_actions()
-                except ElementClickInterceptedException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Не может кликнуть в поле. Поздравление №: {num_msg}.\n{e}")
-                    logging.info(e)
-                except NoSuchElementException as e:
-                    print(e)
-                    logging.info(e)
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в цикле отправления поздравлений. Поздравление №: {num_msg}.\n{e}")
-                    logging.exception(f"Ошибка в цикле отправления поздравлений. Поздравление №: {send_msg}.\n{e}")
-                    break
-                    # driver.save_screenshot(f'/screenshots/birthday-{num_msg}.png')
+                for cv in range(0,13): #перебираем элементы и когда элемент окажется тектовым - отправляем поздравление
+                    ActionChains(driver).send_keys(Keys.TAB).perform()
+                    element = driver.switch_to.active_element
+                    driver.implicitly_wait(1)
+                    try:
+                        if element.find_element_by_tag_name('br').get_attribute('data-text') == 'true':
+                            try:
+                                cmess = driver.find_elements_by_css_selector('[method="POST"]')
+                                cmess[0].location_once_scrolled_into_view
+                                txt = str(random.choice(birthday).replace("\n", ""))
+                                ActionChains(driver).send_keys_to_element(element, txt, Keys.ENTER).perform()
+                                
+                                num_msg = num_msg + 1
+                                time.sleep(random.randrange(5,10))
+                                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравление №: {num_msg}")
+                                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Текст: {txt}")
+                                ActionChains(driver).reset_actions()
+                                break
+                            
+                            except NoSuchElementException as e:
+                                print(e)
+                                logging.info(e)
+                            except Exception as e:
+                                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в цикле отправления поздравлений. Поздравление №: {num_msg}.\n{e}")
+                                logging.exception(f"Ошибка в цикле отправления поздравлений. Поздравление №: {send_msg}.\n{e}")
+                                break
+                    
+                    except Exception as e:
+                        logging.debug(e)
+                        time.sleep(random.randrange(5,10))
+                    
+
             logging.info(f'Отправлено поздравлений на страницу: {num_msg} из {len_count}')
             print (f"\n\nОправлено сообщений на страницу: {num_msg} из {len_count}\n\nРасписание планировщика:\nПоздравления: {schedule_birthday} ч:м\nЛайки сториес: {schedule_stories1} ч:м\nЛайки сториес: {schedule_stories2} ч:м\nЛайки сториес: {schedule_stories3} ч:м\nЛайки ленты: {schedule_like_feed1} ч:м")
             print (f"\n\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Режим ожидания...\n")
@@ -570,6 +591,7 @@ def feed_likes():
     
     # основной цикл
     for x_all in range(0, feed_set):
+        ActionChains(driver).send_keys(Keys.ESCAPE).perform() #жмем esc чтобы убрать всплывающие окна
         time.sleep(random.randrange(1,3))
 
         ActionChains(driver).send_keys("j").perform()
