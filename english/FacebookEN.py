@@ -76,24 +76,23 @@ except Exception as e:
     logging.exception('Error get version')
 
 
-# Chrome options
-options = webdriver.ChromeOptions() 
-options.add_argument("disable-infobars")
-options.add_experimental_option("excludeSwitches", ["enable-automation"])
-options.add_experimental_option('useAutomationExtension', False)
-options.add_argument(f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data\\{chrome_user}")
-
-
 driver = 0
 size = 0
 position = 0
 
 
 def start_browser():
-    global action
     global driver
     global size
     global position
+    
+    # Chrome options
+    options = webdriver.ChromeOptions() 
+    options.add_argument("disable-infobars")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
+    options.add_argument(f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data\\{chrome_user}")
+
     try:
         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Create browser window...")
         driver = webdriver.Chrome(options=options)
@@ -124,7 +123,7 @@ def start_browser():
     driver.execute_cdp_cmd("Network.setExtraHTTPHeaders", {"headers": {"User-Agent": "browser1"}})
     
     driver.set_window_rect(10,10, width_set, height_set)
-    driver.get("chrome://settings/help")
+    driver.get("https://facebook.com/")
     time.sleep(3)
     
     size = driver.get_window_size()
@@ -138,6 +137,20 @@ def start_browser():
     ActionChains(driver).send_keys(Keys.ESCAPE).perform()
     ActionChains(driver).reset_actions()
     logging.info("Create browser window.")
+    
+    try:
+        #Close tab
+        driver.implicitly_wait(7)
+        count_close = driver.find_elements_by_css_selector('[aria-label="Close tab"]')
+        print(f'Close tab: {len(count_close)}')
+        for send_close in count_close:
+            send_close.click()
+            try:
+                driver.find_element_by_css_selector('[aria-label="ОК"]').click()
+            except Exception as e:
+                logging.debug(e)
+    except Exception as e:
+        logging.debug(e)
 
 #-----------------------------------------------------------
 def start_birthday_fb():
@@ -182,14 +195,14 @@ def birthday_message():
             birthday = f.readlines()
             
             count_post = driver.find_elements_by_css_selector("[method='POST']")
-            len_count = len(count_post)
+            len_count = len(count_post)-1
             print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Found fields: {len_count}")
             
             logging.info(f'Found fields: {len_count}')
             num_msg = 0 # counter of sent messages
             
             for send_msg in range(0, len_count):
-                if len_count == 0:
+                if len_count <= 0:
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> No fields found №: {num_msg}")
                     logging.info(f'No fields found №: {num_msg}')
                     break
@@ -198,27 +211,37 @@ def birthday_message():
                     logging.info(f'Congratulations limit №: {num_msg}')
                     break
 
-                try:
-                    cmess = driver.find_elements_by_css_selector("[method='POST']")
-                    cmess[0].location_once_scrolled_into_view
-                    txt = str(random.choice(birthday).replace("\n", ""))
-                    ActionChains(driver).click(cmess[0]).send_keys_to_element(cmess[0],txt, Keys.ENTER).perform()
-                    time.sleep(random.randrange(10,15))
-                    num_msg = num_msg + 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Congratulations №: {num_msg}")
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Text: {txt}")
-                    time.sleep(random.randrange(4,7))
-                    ActionChains(driver).reset_actions()
-                except ElementClickInterceptedException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Error click element. Congratulations №: {num_msg}.\n{e}")
-                    logging.info(e)
-                except NoSuchElementException as e:
-                    print(e)
-                    logging.info(e)
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Error in the congratulations sending cycle. Congratulations №: {num_msg}.\n{e}")
-                    logging.exception(f"Error in the congratulations sending cycle. Congratulations №: {send_msg}.\n{e}")
-                    break
+                for cv in range(0,13):
+                    ActionChains(driver).send_keys(Keys.TAB).perform()
+                    element = driver.switch_to.active_element
+                    driver.implicitly_wait(1)
+                    try:
+                        if element.find_element_by_tag_name('br').get_attribute('data-text') == 'true':
+                            try:
+                                cmess = driver.find_elements_by_css_selector('[method="POST"]')
+                                cmess[0].location_once_scrolled_into_view
+                                txt = str(random.choice(birthday).replace("\n", ""))
+                                ActionChains(driver).send_keys_to_element(element, txt, Keys.ENTER).perform()
+                                
+                                num_msg = num_msg + 1
+                                time.sleep(random.randrange(5,10))
+                                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Congratulations №: {num_msg}")
+                                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Text: {txt}")
+                                ActionChains(driver).reset_actions()
+                                break
+                            
+                            except NoSuchElementException as e:
+                                print(e)
+                                logging.info(e)
+                            except Exception as e:
+                                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Error in the congratulations sending cycle. Congratulations №: {num_msg}.\n{e}")
+                                logging.exception(f"Error in the congratulations sending cycle. Congratulations №: {send_msg}.\n{e}")
+                                break
+                    
+                    except Exception as e:
+                        logging.debug(e)
+                        time.sleep(random.randrange(5,10))
+                    
             logging.info(f'Messages sent: {num_msg} of {len_count}')
             print (f"\n\nMessages sent: {num_msg} of {len_count}")
             print (f"\n\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Waiting...\n")
@@ -515,6 +538,7 @@ def feed_likes():
     count_select = 0
     
     for x_all in range(0, feed_set):
+        ActionChains(driver).send_keys(Keys.ESCAPE).perform()
         time.sleep(random.randrange(1,3))
 
         ActionChains(driver).send_keys("j").perform()
@@ -589,7 +613,7 @@ button3 = tk.Button(fr_buttons, text="Birthday", bg="purple", fg="white", comman
 label1 = tk.Label(fr_buttons,  text=f"Settings\n")
 label2 = tk.Label(fr_buttons,  text=f"\nFunction\n")
 label3 = tk.Label(fr_buttons,  text=f"\n\nCurrent version: {version}\nLast version: {upd_version}")
-label4 = tk.Label(fr_buttons,  text=f"\n\nThis program is written for browser tests\non the example of facebook.\nUse at your own risk.\nThe author is not responsible\nfor damage from this program.")
+label4 = tk.Label(fr_buttons,  text=f"\n\ndisclaimer: please note that this\nis a research project. i am by no\nmeans responsible for any usage\nof this tool. use on your own \nbehalf. i'm also not responsible if\nyour accounts get banned due to\nextensive use of this tool..")
 
 site_link = tk.Entry(fr_buttons)
 label1.grid(row=0, column=0)
