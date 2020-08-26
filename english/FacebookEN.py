@@ -46,11 +46,6 @@ try:
     birthday_set = int(config.get("Settings", "birthday"))
     feed_set = int(config.get("Settings", "feed"))
     feed_select = int(config.get("Settings", "feed_select"))
-    schedule_birthday = str(config.get("Times", "schedule_birthday"))
-    schedule_stories1 = str(config.get("Times", "schedule_stories1"))
-    schedule_stories2 = str(config.get("Times", "schedule_stories2"))
-    schedule_stories3 = str(config.get("Times", "schedule_stories3"))
-    schedule_like_feed1 = str(config.get("Times", "schedule_like_feed1"))
 
     
     stories_set_end = stories_set - 1
@@ -145,8 +140,10 @@ def start_browser():
         print(f'Close tab: {len(count_close)}')
         for send_close in count_close:
             send_close.click()
+            time.sleep(5)
             try:
                 driver.find_element_by_css_selector('[aria-label="ОК"]').click()
+                time.sleep(5)
             except Exception as e:
                 logging.debug(e)
     except Exception as e:
@@ -183,6 +180,7 @@ def start_birthday_fb():
         try:
             birthday_message()
         except Exception as e:
+            driver.quit()
             logging.debug(e)
 
 # function of birthday
@@ -540,6 +538,14 @@ def feed_likes():
     for x_all in range(0, feed_set):
         ActionChains(driver).send_keys(Keys.ESCAPE).perform()
         time.sleep(random.randrange(1,3))
+        
+        
+        try: # if slow server 1GB memory (free amason micro) error: "Out of memory"
+            driver.find_element_by_tag_name('div')
+        except Exception:
+            driver.refresh()
+            logging.info('Out of memory')
+            time.sleep(random.randrange(15,20))
 
         ActionChains(driver).send_keys("j").perform()
         time.sleep(random.randrange(6,10))
