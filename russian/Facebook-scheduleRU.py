@@ -53,6 +53,8 @@ try:
     schedule_stories2 = str(config.get("Times", "schedule_stories2")) # планировщик сториес
     schedule_stories3 = str(config.get("Times", "schedule_stories3")) # планировщик сториес
     schedule_like_feed1 = str(config.get("Times", "schedule_like_feed1")) # планировщик лайков новостной ленты
+    schedule_like_feed2 = str(config.get("Times", "schedule_like_feed2")) # планировщик лайков новостной ленты
+
 
     stories_set_end = stories_set - 1 # отнимаем единицу, для условия завешения работы
 except Exception as e:
@@ -155,11 +157,14 @@ def start_browser():
         #закрываем вкладки
         driver.implicitly_wait(7)
         count_close = driver.find_elements_by_css_selector('[aria-label="Закрыть вкладку"]')
-        print(f'Закрыть вкладку: {len(count_close)}')
+        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено открытых вкладок: {len(count_close)}")
         for send_close in count_close:
             send_close.click()
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Закрыта вкладка")
+            time.sleep(5)
             try:
                 driver.find_element_by_css_selector('[aria-label="ОК"]').click()
+                time.sleep(5)
             except Exception as e:
                 logging.debug(e)
     except Exception as e:
@@ -199,6 +204,7 @@ def start_birthday_fb():
         try:
             birthday_message() # Если всё ОК, переходим в функцую отправки сообщений
         except Exception as e:
+            driver.quit()
             logging.debug(e)
 
 # Функция отправки поздравлений
@@ -512,16 +518,18 @@ def stories_likes():
                     next_refrash = 0 # clear count error
                 except Exception as e:
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Не найдены обе кнопки NEXT. Обновление...")
-                    logging.warning(f"Блок Сториес. Не найдены кнопки NEXT. Останавливаем цикл.\n{e}")
+                    logging.debug("Блок Сториес. Не найдены кнопки NEXT. Обновление.")
                     
                     next_refrash = next_refrash + 1
                     
                     if next_refrash == 3: # if repeat error no button NEXT - quit browser
-                        logging.info("Не найдены кнопки NEXT. Выходим.")
+                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопки не найдены. Закрываем браузер...")
+                        logging.warning("Не найдены кнопки NEXT. Закрываем браузер.")
                         driver.quit()
                         break
                     
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Обновление окна.")
+                    logging.info('Refresh browser. No button NEXT')
                     driver.refresh()
                     time.sleep(random.randrange(10,15))
                     #перемещаемся по ссылкам на сториес человека
@@ -534,7 +542,7 @@ def stories_likes():
                         print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка кнопки вкл\выкл звука...\n{e}")
                         logging.info(f"Ошибка кнопки вкл\выкл звука...\n{e}")
                     time.sleep(random.randrange(2,4))
-                    logging.info('Refresh browser. No button NEXT')
+
                     
             
             count_next = count_next + 1
@@ -593,6 +601,15 @@ def feed_likes():
     for x_all in range(0, feed_set):
         ActionChains(driver).send_keys(Keys.ESCAPE).perform() #жмем esc чтобы убрать всплывающие окна
         time.sleep(random.randrange(1,3))
+        
+        try: # ищем первый попавшийся тег, так на сервере с 1гб оперативной памяти завсает браузер с ошибкой "Недостаточно оперативной памяти"
+            # если памяти больше, то можно удалить
+            driver.find_element_by_tag_name('div')
+        except Exception:
+            driver.refresh()
+            logging.info('Out of memory')
+            time.sleep(random.randrange(15,20))
+            
 
         ActionChains(driver).send_keys("j").perform()
         time.sleep(random.randrange(6,10))
@@ -649,6 +666,7 @@ schedule.every().day.at(schedule_stories1).do(start_stories_fb)
 schedule.every().day.at(schedule_stories2).do(start_stories_fb)
 schedule.every().day.at(schedule_stories3).do(start_stories_fb)
 schedule.every().day.at(schedule_like_feed1).do(start_feed_likes)
+schedule.every().day.at(schedule_like_feed2).do(start_feed_likes)
 
 while True:
     try:
