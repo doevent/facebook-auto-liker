@@ -1,6 +1,6 @@
 # Facebook Auto Liker (English, Russian)
 ![alt text](win.jpg)
-### version v0.3.1-beta.4
+### version v0.3.1-beta.5
 Facebook likes feeds, likes stories, send message birthday.
 
 Автоматический лайкер новостной ленты, историй и отправка поздравлений с днем рождения.
@@ -111,8 +111,8 @@ FacebookRU.exe birthday
 * Windows 10, 2019
 * Python 3.7+
 * Selenium 3.4.0+
-* Chrome driver current test release 84.0.4147.30 (for other version: [download driver](https://chromedriver.chromium.org/))
-* Chrome current test release 84.0+ (chrome://settings/help)
+* Chrome driver current test release version 85.0.4183.87 (for other version: [download driver](https://chromedriver.chromium.org/))
+* Chrome current test release 85.0+ (chrome://settings/help)
 * Facebook language: Russian, English
 * Switch to New Facebook design
 
