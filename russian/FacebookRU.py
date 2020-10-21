@@ -1,5 +1,7 @@
 # -*- coding: utf8 -*-
 
+# patch chromedriver.exe:  Replacing cdc_ variable ($cdc_asdjflasutopfhvcZLmcfl_)
+
 import logging
 
 from selenium import webdriver
@@ -34,7 +36,6 @@ logging.info("==============================================================")
 logging.info("Старт программы")
 
 
-
 # Загрузка настроек из ini файла
 try:
     config = configparser.ConfigParser()
@@ -43,14 +44,15 @@ try:
     chrome_user = config.get("Settings", "chrome_user") # Имя пользователя в браузере Хром
     width_set = int(config.get("Settings", "width")) # Ширина окна браузера
     height_set = int(config.get("Settings", "height")) # Высота окна браузера сториес
+    images_set = int(config.get("Settings", "images")) # включает и отключает картинки
     stories_set = int(config.get("Settings", "stories")) # количество циклов сториес
     birthday_set = int(config.get("Settings", "birthday")) # количество циклов поздравления
-    feed_set = int(config.get("Settings", "feed")) # количество циклов поздравления
-    feed_select = int(config.get("Settings", "feed_select")) # количество циклов поздравления
+    feed_set = int(config.get("Settings", "feed")) # количество циклов в ленте друзей
+    feed_select = int(config.get("Settings", "feed_select")) # # релевантные или новые сообщения в ленте
     API_TOKEN = str(config.get("Settings", "token")) # Токен телеграм бота
     BotID = str(config.get("Settings", "botid")) # ID телеграм бота
 
-    
+
     stories_set_end = stories_set - 1 # отнимаем единицу, для условия завешения работы
 except Exception as e:
     logging.exception("Ошибка загрузки INI")
@@ -79,8 +81,11 @@ except Exception as e:
 
 
 driver = 0 # селениум
-size = 0 # размер окна браузер
-position = 0 # позиция окна браузера
+# переменные счетчиков сториес
+count_like = 0
+count_super = 0
+count_together = 0
+next_refrash = 0
 print (f"\nТекущая версия: {version}\nПоследняя версия: {upd_version}")
 print (f"\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ожидание...\n")
 
@@ -88,16 +93,16 @@ print (f"\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ожида
 #Функция Создания окна браузера
 def start_browser():
     global driver
-    global size
-    global position
-    
+
     #настройки создания окна хрома
     options = webdriver.ChromeOptions() 
     options.add_argument("disable-infobars")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
     options.add_argument(f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data\\{chrome_user}")
-
+    if images_set == 0: # отключает картинки
+        prefs = {"profile.managed_default_content_settings.images": 2}
+        options.add_experimental_option("prefs", prefs)
     try:
         # создаем пустое окно браузера
         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Создаем окно браузера...")
@@ -229,7 +234,7 @@ def birthday_message():
                     logging.info(f'Лимит поздравлений №: {num_msg}')
                     break
 
-                for cv in range(0,13): #перебираем элементы и когда элемент окажется тектовым - отправляем поздравление
+                for cv in range(0,20): #перебираем элементы и когда элемент окажется тектовым - отправляем поздравление
                     ActionChains(driver).send_keys(Keys.TAB).perform()
                     element = driver.switch_to.active_element
                     driver.implicitly_wait(1)
@@ -240,9 +245,8 @@ def birthday_message():
                                 cmess[0].location_once_scrolled_into_view
                                 txt = str(random.choice(birthday).replace("\n", ""))
                                 ActionChains(driver).send_keys_to_element(element, txt, Keys.ENTER).perform()
-                                
                                 num_msg = num_msg + 1
-                                time.sleep(random.randrange(5,10))
+                                time.sleep(random.randrange(6,9))
                                 print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравление №: {num_msg}")
                                 print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Текст: {txt}")
                                 ActionChains(driver).reset_actions()
@@ -258,7 +262,7 @@ def birthday_message():
                     
                     except Exception as e:
                         logging.debug(e)
-                        time.sleep(random.randrange(5,10))
+                        time.sleep(random.randrange(2,3))
                     
             logging.info(f'Отправлено поздравлений: {num_msg} из {len_count}')
             print (f"\n\nОправлено поздравлений: {num_msg} из {len_count}")
@@ -316,7 +320,6 @@ def start_stories_fb():
         logging.exception("Не найдена кнопка 'Все истории'.")
         stories_fb_alternative()  # Ищем на странице кнопку, если не найдена, то переходим на альтернатиынй вариант
 
-
 #альтернативный сценарий входа в сториес
 def stories_fb_alternative():
     logging.info("Включение функции альтернативного сценария сториес")
@@ -332,30 +335,117 @@ def stories_fb_alternative():
     ActionChains(driver).send_keys(Keys.RETURN).perform()
     stories_likes() # переходим в функцию поиска кнопок и лайков
 
+# кнопки лайк, супер и звук и тд...
+def stories_button(button, stories=None):
+    #переменные счетчиков
+    global count_like
+    global count_super
+    global count_together
+    global next_refrash
+
+    
+    wait = WebDriverWait(driver, 3)
+    
+    # Отключаем звук на компе
+    if button == 'sound':
+        try:
+            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Выключить звук"]'))).click()
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Звук выключен")
+        except Exception as e:
+            print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка кнопки вкл\выкл звука...\n{e}")
+            logging.info("Ошибка кнопки вкл\выкл звука...\n{e}")
+    
+    elif button == 'like':
+        try:
+            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
+        except TimeoutException as e:
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.\n{e}")
+            logging.info(f'Like button not \n{e}')
+        else:
+            count_like += 1
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
+
+    elif button == 'love':
+        try:
+            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
+        except Exception as e:
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
+            logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
+        else:
+            count_super += 1
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - СУПЕР...")
+    
+    elif button == 'cave':
+        try:
+            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="16"]'))).click()
+        except Exception as e:
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка МЫ ВМЕСТЕ не найдена.\n{e}")
+            logging.info(f"Блок Сториес. Не найдена кнопка МЫ ВМЕСТЕ.\n{e}")
+        else:
+            count_together += 1 # счетчик мы вместе
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - МЫ ВМЕСТЕ..")
+    elif button == 'next':
+        # NEXT
+        try:
+            wait = WebDriverWait(driver, 3)
+            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '''[aria-label='Кнопка "Следующая подборка"']'''))).click()
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Кнопка: Следующая подборка")
+            time.sleep(random.randrange(1,2))
+            next_refrash = 0 # clear count error
+        except Exception as e:
+            try:
+                wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '''[aria-label='Кнопка "Следующая открытка"']'''))).click()
+                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Кнопка: Следующая открытка")
+                time.sleep(random.randrange(1,2))
+                next_refrash = 0 # clear count error
+            except Exception as e:
+                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Не найдены обе кнопки NEXT. Обновление...")
+                logging.debug("Блок Сториес. Не найдены кнопки NEXT. Обновление.")
+                
+                next_refrash += 1
+                
+                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Обновление окна.")
+                logging.info('Refresh browser. No button NEXT')
+                driver.refresh()
+                time.sleep(random.randrange(10,15))
+                #перемещаемся по ссылкам на сториес человека
+                ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.RETURN).perform()
+                time.sleep(random.randrange(4,8))
+                try:
+                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Выключить звук"]'))).click()
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Звук выключен")
+                except Exception as e:
+                    print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка кнопки вкл\выкл звука...\n{e}")
+                    logging.info("Ошибка кнопки вкл\выкл звука...\n{e}")
+
 # основная функция лайков сториес
 def stories_likes():
-    #переменные счетчиков
-    count_like = 0
-    count_super = 0
     count_next = 0
-    count_together = 0
     count_skip = 0
-    
     next_refrash = 0
     wait = WebDriverWait(driver, 30)
     driver.implicitly_wait(5) # seconds
 
     #перемещаемся по ссылкам на сториес человека
-    ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.RETURN).perform()
+    ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB).perform() # , Keys.RETURN
     time.sleep(random.randrange(4,8))
-
-    try: # Отключаем звук на компе
-        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Выключить звук"]'))).click()
-        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Звук выключен")
+    
+    try:
+        # листаем фрейм со списком сториес, чтобы он прогрузился
+        element = driver.switch_to.active_element # сохраняем активный элемент
+        for tx in range(0, 8):
+            ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB).perform()
+            time.sleep(random.randrange(2,3))
+        # time.sleep(random.randrange(30,40))
+        # возвращаемся к сохраненному элементу
+        element.location_once_scrolled_into_view
+        time.sleep(random.randrange(2,3))
+        element.click()
     except Exception as e:
-        print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка кнопки вкл\выкл звука...\n{e}")
-        logging.info("Ошибка кнопки вкл\выкл звука...\n{e}")
+        logging.warning(f"Ошибка в блоке прогрузки фрейма сториес\n{e}")
+        ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.RETURN).perform()
         
+    stories_button('sound')
     try:
         # Цикл лайков
         for stories in range(0, stories_set):
@@ -364,182 +454,56 @@ def stories_likes():
             # генерация разных сценариев лайков
             if rnd_like == 1:
                 # Одинарный лайк
-                try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except TimeoutException as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.\n{e}")
-                    logging.info(f'Like button not \n{e}')
-                else:
-                    count_like = count_like + 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
-                
+                stories_button('like', stories)
+ 
             elif rnd_like == 2:
                 #Одинарный супер
-                try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
-                    logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
-                else:
-                    count_super = count_super + 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - СУПЕР...")
+                stories_button('love', stories)
             
             elif rnd_like == 3:
                 # Несколько лайков
                 for mkmk in range(0,random.randrange(2,5)):
-                    try:
-                        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                    except Exception as e:
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.\n{e}")
-                        logging.info(f'Like button not found\n{e}')
-                    else:
-                        count_like = count_like + 1
-                        time.sleep(random.randrange(0,3))
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
+                    stories_button('like', stories)
             
             elif rnd_like == 4:
                 # Несколько Супер
                 for mkmk in range(0, random.randrange(2,5)):
-                    try:
-                        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                    except Exception as e:
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
-                        logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
-                    else:
-                        time.sleep(random.randrange(0,3))
-                        count_super = count_super + 1
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - СУПЕР...")
+                    stories_button('love', stories)
             
             elif rnd_like == 5:
                 # Лайк + Супер
-                try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.\n{e}")
-                    logging.info(f'Like button not found\n{e}')
-                else:
-                    count_like = count_like + 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
-                    time.sleep(random.randrange(1,4))
-                
-                try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
-                    logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
-                else:
-                    count_super = count_super + 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - СУПЕР...")
+                stories_button('like', stories)
+                time.sleep(random.randrange(1,4))
+                stories_button('love', stories)
             
             elif rnd_like == 6:
                 # Супер + Лайк
-                try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
-                    logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
-                else:
-                    count_super = count_super + 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - СУПЕР...")
-                    time.sleep(random.randrange(1,4))
-                
-                try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.\n{e}")
-                    logging.info(f'Like button not found\n{e}')
-                else:
-                    count_like = count_like + 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
-
+                stories_button('love', stories)
+                time.sleep(random.randrange(1,4))
+                stories_button('like', stories)
             
             elif rnd_like == 7:
                 # Лайк, супер, мы вместе
-                try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.")
-                    logging.info(f'Like button not found\n{e}')
-                else:
-                    count_like = count_like + 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
-                    time.sleep(random.randrange(1,4))
-                
-                try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.")
-                    logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
-                else:
-                    count_super = count_super + 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - СУПЕР...")
-                    time.sleep(random.randrange(0,3))
-                
-                try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="16"]'))).click()
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка МЫ ВМЕСТЕ не найдена.\n{e}")
-                    logging.info(f"Блок Сториес. Не найдена кнопка МЫ ВМЕСТЕ.\n{e}")
-                else:
-                    count_together = count_together + 1 # счетчик мы вместе
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - МЫ ВМЕСТЕ...")
-                    time.sleep(random.randrange(1,4))
+                stories_button('like', stories)
+                time.sleep(random.randrange(1,4))
+
+                stories_button('love', stories)
+                time.sleep(random.randrange(2,4))
+                stories_button('cave', stories)
                 
             elif rnd_like == 8:
                 # Мы вместе
-                try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="16"]'))).click()
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка МЫ ВМЕСТЕ не найдена.\n{e}")
-                    logging.info(f"Блок Сториес. Не найдена кнопка МЫ ВМЕСТЕ.\n{e}")
-                else:
-                    count_together = count_together + 1 # счетчик мы вместе
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - МЫ ВМЕСТЕ..")
-
+                stories_button('cave', stories)
 
             # NEXT
-            try:
-                wait = WebDriverWait(driver, 3)
-                wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '''[aria-label='Кнопка "Следующая подборка"']'''))).click()
-                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Кнопка: Следующая подборка")
-                time.sleep(random.randrange(1,2))
-                next_refrash = 0 # clear count error
-            except Exception as e:
-                try:
-                    # print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Не найдена кнопка NEXT. Пробуем второй вариант")
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '''[aria-label='Кнопка "Следующая открытка"']'''))).click()
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Кнопка: Следующая открытка")
-                    time.sleep(random.randrange(1,2))
-                    next_refrash = 0 # clear count error
-                except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Не найдены обе кнопки NEXT. Обновление...")
-                    logging.debug("Блок Сториес. Не найдены кнопки NEXT. Обновление.")
-                    
-                    next_refrash = next_refrash + 1
-                    
-                    if next_refrash == 3: # if repeat error no button NEXT - quit browser
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопки не найдены. Закрываем браузер...")
-                        logging.warning("Не найдены кнопки NEXT. Закрываем браузер.")
-                        driver.quit()
-                        break
-                    
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Обновление окна.")
-                    logging.info('Refresh browser. No button NEXT')
-                    driver.refresh()
-                    time.sleep(random.randrange(10,15))
-                    #перемещаемся по ссылкам на сториес человека
-                    ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.RETURN).perform()
-                    time.sleep(random.randrange(4,8))
-                    try: # Отключаем звук на компе
-                        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Выключить звук"]'))).click()
-                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Звук выключен")
-                    except Exception as e:
-                        print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка кнопки вкл\выкл звука... \n{e}")
-                        logging.info("Ошибка кнопки вкл\выкл звука...")
-                    time.sleep(random.randrange(2,4))
-                    
+            stories_button('next', stories)
+            if next_refrash == 3: # if repeat error no button NEXT - quit browser
+                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопки не найдены. Закрываем браузер...")
+                logging.warning("Не найдены кнопки NEXT. Закрываем браузер.")
+                driver.quit()
+                break
             
-            count_next = count_next + 1
+            count_next += 1
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - Листаем...")
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Цикл № {stories} из {stories_set_end} ...")
             time.sleep(random.randrange(2,4))
@@ -595,15 +559,6 @@ def feed_likes():
     for x_all in range(0, feed_set):
         ActionChains(driver).send_keys(Keys.ESCAPE).perform() #жмем esc чтобы убрать всплывающие окна
         time.sleep(random.randrange(1,3))
-        
-        try: # ищем первый попавшийся тег, так на сервере с 1гб оперативной памяти завсает браузер с ошибкой "Недостаточно оперативной памяти"
-            # если памяти больше, то можно удалить
-            driver.find_element_by_tag_name('div')
-        except Exception:
-            driver.refresh()
-            logging.info('Out of memory')
-            time.sleep(random.randrange(15,20))
-            
         
         ActionChains(driver).send_keys("j").perform()
         time.sleep(random.randrange(6,10))
