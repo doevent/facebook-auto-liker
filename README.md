@@ -30,7 +30,7 @@ Windows:
 ```
 downloads .exe files
 ```
-## Настройки
+## Settings
 
 #### Настройка параметров
 Настройка осуществляется без графического интерфейса в тестовом формате путем редактивания файла **setting.ini** через текстовый редактор или во встроенном текстовым редакторе.
@@ -80,29 +80,28 @@ schedule_stories1 = 10:00
 ```
 schedule_like_feed = 15:00
 ```
-#### Настройка поздравлений с днем рождения 
+#### Setting birthday 
 Настройка осуществляется путем редактирования файла **birthday.txt**. Одно поздравление в одну строку, без переносов. Пример:
 ```
-Поздравляю с днем рождения!
-Мои поздравления с днем рождения!
-Поздравляю с днюшечкой!
-Мои поздравления с днюшечкой
-Поздравляю с Днем Рождения!
-С Днем Рождения тебя!
-Прими мои поздравления с днем рождения!
+Happy Birthday!
+Wishing you a Happy Birthday!
+Best wishes and a wonderful Birthday!
+Happy Birthday! Wishing you all the best on your special day!
+Congratulations and best wishes on your Birthday!
+I wish you a Happy Birthday and many happy returns of the day!
 ```
-#### Командная строка
-Лайки новостной ленты:
+#### Command line
+Frends feed likes:
 ```
 python FacebookRU.py feed
 FacebookRU.exe feed
 ```
-Лайки историй:
+Likes stories:
 ```
 python FacebookRU.py story
 FacebookRU.exe story
 ```
-Поздравления с днем рождения:
+Birthday:
 ```
 python FacebookRU.py birthday
 FacebookRU.exe birthday
