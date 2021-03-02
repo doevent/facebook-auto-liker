@@ -153,9 +153,9 @@ def start_browser():
     logging.info("Создано окно браузера.")
 
     try:
-        #закрываем вкладки
+        # Закрываем вкладки
         driver.implicitly_wait(7)
-        count_close = driver.find_elements_by_css_selector('[aria-label="Закрыть вкладку"]')
+        count_close = driver.find_elements_by_css_selector('[aria-label="Закрыть чат"]')
         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено открытых вкладок: {len(count_close)}")
         for send_close in count_close:
             send_close.click()
@@ -178,21 +178,7 @@ def start_birthday_fb():
     logging.info('Старт сценария поздравлений с днем рождения')
     if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
         bot.send_message(BotID, "<b>Старт</b> сценария поздравлений с днем рождения.", parse_mode='Html')
-    
 
-    time.sleep(10)
-    driver.get("https://www.facebook.com/")
-    driver.implicitly_wait(10) # seconds
-    time.sleep(10)
-    wait = WebDriverWait(driver, 10)
-    WebDriverWait(driver, 10)
-
-    ActionChains(driver).send_keys(Keys.ESCAPE).perform() #жмем esc чтобы убрать всплывающие окна
-    time.sleep(2)
-    ActionChains(driver).send_keys(Keys.ESCAPE).perform() #жмем esc чтобы убрать всплывающие окна
-    time.sleep(2)
-    ActionChains(driver).send_keys(Keys.HOME).perform() # листаем вверх
-    time.sleep(random.randrange(15,20))
     
     try:
         driver.find_element_by_css_selector("[href='/events/birthdays/']").click()
@@ -207,8 +193,9 @@ def start_birthday_fb():
             driver.quit()
             logging.debug(e)
 
-# Функция отправки поздравлений
+# Основная функция отправки поздравлений
 def birthday_message():
+    start_time = time.time()
     driver.implicitly_wait(40) # seconds
     time.sleep(random.randrange(18,27))
 
@@ -219,65 +206,25 @@ def birthday_message():
             count_post = driver.find_elements_by_css_selector('[method="POST"]')
             len_count = len(count_post)-1
             print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено полей для поздавлений: {len_count}")
-            
+
+            count_button = len(driver.find_elements_by_css_selector('[aria-label="Сообщение"]'))
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено кнопок СООБЩЕНИЕ (в личку):  {count_button}")
                 
             logging.info(f'Найдено полей для поздавлений: {len_count}')
-            num_msg = 0 #счетчик отправленных сообщений
-            
-            for send_msg in range(0, len_count):
-                if len_count <= 0:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Нет полей поздравлений №: {num_msg}")
-                    logging.info(f'Нет полей поздравлений №: {num_msg}')
-                    break
-                elif send_msg >= birthday_set:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Лимит поздравлений №: {num_msg}")
-                    logging.info(f'Лимит поздравлений №: {num_msg}')
-                    break
+            num_msg = 0 #счетчик отправленных хроник
+            num_button = 0
 
-                for cv in range(0,20): #перебираем элементы и когда элемент окажется тектовым - отправляем поздравление
-                    ActionChains(driver).send_keys(Keys.TAB).perform()
-                    element = driver.switch_to.active_element
-                    driver.implicitly_wait(1)
-                    try:
-                        if element.find_element_by_tag_name('br').get_attribute('data-text') == 'true':
-                            try:
-                                cmess = driver.find_elements_by_css_selector('[method="POST"]')
-                                cmess[0].location_once_scrolled_into_view
-                                txt = str(random.choice(birthday).replace("\n", ""))
-                                ActionChains(driver).send_keys_to_element(element, txt, Keys.ENTER).perform()
-                                num_msg = num_msg + 1
-                                time.sleep(random.randrange(6,9))
-                                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравление №: {num_msg}")
-                                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Текст: {txt}")
-                                ActionChains(driver).reset_actions()
-                                break
-                            
-                            except NoSuchElementException as e:
-                                print(e)
-                                logging.info(e)
-                            except Exception as e:
-                                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в цикле отправления поздравлений. Поздравление №: {num_msg}.\n{e}")
-                                logging.exception(f"Ошибка в цикле отправления поздравлений. Поздравление №: {send_msg}.\n{e}")
-                                break
-                    
-                    except Exception as e:
-                        logging.debug(e)
-                        time.sleep(random.randrange(2,3))
-                    
-            logging.info(f'Отправлено поздравлений: {num_msg} из {len_count}')
-            print (f"\n\nОправлено поздравлений: {num_msg} из {len_count}")
-            print (f"\n\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ожидание...\n")
-            try:
-                if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
-                    bot.send_message(BotID, f"<b>Конец</b> функции BIRTHDAY.\n\nОправлено на страницу: <b>{num_msg}</b> из <b>{len_count}</b>", parse_mode='Html')
-            except Exception as e:
-                logging.debug(e)
-            f.close()
-            try:
-                driver.quit()
-            except Exception as e:
-                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка закрытия браузера...")
+            # # Переходим на страницу с поздравлениями
+            # driver.get("https://www.facebook.com/events/birthdays/")
+            # driver.implicitly_wait(10) # seconds
+            # time.sleep(3)
 
+            # ActionChains(driver).send_keys(Keys.ESCAPE).perform() #жмем esc чтобы убрать всплывающие окна
+            # time.sleep(2)
+            # ActionChains(driver).send_keys(Keys.ESCAPE).perform() #жмем esc чтобы убрать всплывающие окна
+            # time.sleep(2)
+            # ActionChains(driver).send_keys(Keys.HOME).perform() # листаем вверх
+            # time.sleep(random.randrange(10,15))
 
     except Exception as e:
         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в блоке поздравлений\n{e}\n")
@@ -287,6 +234,123 @@ def birthday_message():
             driver.quit()
         except Exception as e:
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка закрытия браузера...")
+
+
+    for cv in range(0,200): #перебираем элементы и когда элемент окажется тектовым - отправляем поздравление
+        ActionChains(driver).send_keys(Keys.TAB).perform()
+        element = driver.switch_to.active_element
+        # if element.find_elements_by_tag_name('span'):
+        #     print(element.get_attribute("innerHTML"), "\n")
+        driver.implicitly_wait(0)
+        if len_count == num_msg or len_count == 0 or num_msg >= 19:
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравления в хронике кончились: {num_msg}. Циклов всего: {cv}")
+            break
+        try:
+            if element.find_element_by_tag_name('br').get_attribute('data-text') == 'true':
+                try:
+                    cmess = driver.find_elements_by_css_selector('[method="POST"]')
+                    # cmess[0].location_once_scrolled_into_view
+                    # time.sleep(random.randrange(2, 5))
+                    txt = str(random.choice(birthday).replace("\n", ""))
+                    ActionChains(driver).send_keys_to_element(element, txt, Keys.ENTER).perform()
+                    num_msg += 1
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравление в хронику №: {num_msg}")
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Текст: {txt}")
+                    time.sleep(random.randrange(10, 15))
+                    ActionChains(driver).reset_actions()
+
+                except NoSuchElementException as e:
+                    print(e)
+                    logging.info(e)
+                except Exception as e:
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в цикле отправления поздравлений. Поздравление №: {num_msg}.\n{e}")
+                    logging.exception(f"Ошибка в цикле отправления поздравлений. Поздравление №: {send_msg}.\n{e}")
+                    break
+
+        except Exception as e:
+            logging.warning(f"Поздравления в хронику: {e}")
+
+
+
+    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Начало поздравлений в личку")
+
+    if count_button != 1 or count_button == 0: # если 0 и 1 то не перезагружаем страницу
+        for t in range(0, 2):
+            ActionChains(driver).send_keys(Keys.ESCAPE).perform()  # жмем esc чтобы убрать всплывающие окна
+            time.sleep(2)
+        time.sleep(random.randrange(3, 6))
+
+        driver.implicitly_wait(10)
+        driver.get("https://www.facebook.com/events/birthdays/")
+        time.sleep(random.randrange(10, 15))
+
+    # Поиск кнопки
+    try:
+        for msgbut in driver.find_elements_by_css_selector('[aria-label="Сообщение"]'):
+            if count_button == num_button or count_button == 0 or num_button >= 15:
+                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравления в личку кончились: {num_button}.")
+                break
+            try:
+                # Клик по кнопке
+                try:
+                    msgbut.click()
+                except Exception as e:
+                    print(msgbut.location)
+                    print(f'Ошибка в клике по кнопке СООБЩЕНИЕ. Пробуем второй способ {e}')
+                    ActionChains(driver).move_to_element(msgbut).click().perform()
+
+                txt = str(random.choice(birthday).replace("\n", ""))
+                time.sleep(random.randrange(40, 50))
+                ActionChains(driver).send_keys(txt, Keys.ENTER).perform()
+                num_button += 1
+                time.sleep(random.randrange(5,10))
+                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравление в личку: {num_button}")
+                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Текст: {txt}")
+                ActionChains(driver).reset_actions()
+
+
+                driver.implicitly_wait(20)
+                #закрываем вкладки
+                count_close = driver.find_elements_by_css_selector('[aria-label="Закрыть чат"]')
+
+                for send_close in count_close:
+                    send_close.click()
+                    time.sleep(random.randrange(5,10))
+                    try:
+                        driver.find_element_by_css_selector('[aria-label="ОК"]').click()
+                    except NoSuchElementException as e:
+                        logging.debug(e)
+                print(f'Закрыто вкладок: {len(count_close)}')
+                time.sleep(random.randrange(10, 15))
+            except Exception as e:
+                print(f'Блок поздравлений в личку: {e}')
+                logging.warning(f'Не может кликнуть на кнопку СООБЩЕНИЕ: {e}')
+                break
+    except Exception as e:
+        print(e)
+        logging.warning(f"Поздравления в личные сообщения: {e}")
+
+                    
+    logging.info(f'Отправлено поздравлений: {num_msg} из {len_count}')
+    print (f"\n\nОправлено поздравлений в хронику: {num_msg} из {len_count}")
+    print(f"Оправлено поздравлений в личку: {num_button} из {count_button}")
+    print(f'Время выполнения: {round(time.time() - start_time, 1)} секунд')
+    print (f"\n\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ожидание...\n")
+    try:
+        if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
+            bot.send_message(BotID, f"<b>Конец</b> функции BIRTHDAY.\n\nОправлено поздравлений в хронику: <b>{num_msg}</b> из <b>{len_count}</b>\n"
+                                    f"Оправлено поздравлений в личку: <b>{num_button}</b> из <b>{count_button}</b>"
+                                    f"\nВремя выполнения: {round(time.time() - start_time, 1)} секунд", parse_mode='Html')
+    except Exception as e:
+        logging.debug(e)
+    f.close()
+    try:
+        driver.quit()
+    except Exception as e:
+        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка закрытия браузера...")
+
+
+
 
 
 #-----------------------------------------------------------
@@ -342,7 +406,6 @@ def stories_button(button, stories=None):
     global count_super
     global count_together
     global next_refrash
-
     
     wait = WebDriverWait(driver, 3)
     
@@ -357,17 +420,24 @@ def stories_button(button, stories=None):
     
     elif button == 'like':
         try:
-            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="1"]'))).click()
-        except TimeoutException as e:
-            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка LIKE не найдена.\n{e}")
-            logging.info(f'Like button not \n{e}')
-        else:
-            count_like += 1
+            buttonLIKE = driver.find_elements_by_css_selector('[aria-label="Нравится"]')
+            for btn_like in buttonLIKE:
+                driver.implicitly_wait(0)  # seconds
+                try:
+                    btn_like.click()
+                    # print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка лайк - найдена...")
+                    break
+                except Exception as e:
+                    logging.debug('Like button not found')
+                    # print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка ЛАЙК не найдена. Ищем дальше...")
+            count_like = count_like + 1
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
-
+        except Exception as e:
+            logging.debug('Error find LIKEButton')
     elif button == 'love':
         try:
-            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
+            # wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
+            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Супер"]'))).click()
         except Exception as e:
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
             logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
@@ -377,7 +447,8 @@ def stories_button(button, stories=None):
     
     elif button == 'cave':
         try:
-            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="16"]'))).click()
+            # wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="16"]'))).click()
+            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Мы вместе"]'))).click()
         except Exception as e:
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка МЫ ВМЕСТЕ не найдена.\n{e}")
             logging.info(f"Блок Сториес. Не найдена кнопка МЫ ВМЕСТЕ.\n{e}")
@@ -423,6 +494,7 @@ def stories_likes():
     count_next = 0
     count_skip = 0
     next_refrash = 0
+    start_time = time.time()
     wait = WebDriverWait(driver, 30)
     driver.implicitly_wait(5) # seconds
 
@@ -435,7 +507,7 @@ def stories_likes():
         element = driver.switch_to.active_element # сохраняем активный элемент
         for tx in range(0, 8):
             ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB, Keys.TAB).perform()
-            time.sleep(random.randrange(2,3))
+            time.sleep(random.randrange(4,7))
         # time.sleep(random.randrange(30,40))
         # возвращаемся к сохраненному элементу
         element.location_once_scrolled_into_view
@@ -451,6 +523,7 @@ def stories_likes():
         for stories in range(0, stories_set):
             wait = WebDriverWait(driver, 3)
             rnd_like = random.randrange(1,9)
+
             # генерация разных сценариев лайков
             if rnd_like == 1:
                 # Одинарный лайк
@@ -513,11 +586,14 @@ def stories_likes():
                 logging.info(f"Кол-во: {stories} - Цикл лайков успешно завершен.")
                 
                 driver.quit()
-                print (f"\n\nПоставлено лайков: {count_like}\nПоставленно сердечек: {count_super}\nПоставлено Мы вместе: {count_together}\nПролистано: {count_next}\nВсего циклов: {stories + 1}")
-                print (f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ожидание...\n")
+                print (f"\n\nПоставлено лайков: {count_like}\nПоставленно сердечек: {count_super}\nПоставлено Мы вместе: "
+                       f"{count_together}\nПролистано: {count_next}\nВсего циклов: {stories + 1}\nВремя выполнения: {round(time.time() - start_time, 1)} секунд")
+                print (f"\n\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ожидание...\n")
                 try:
                     if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
-                        bot.send_message(BotID, f"Конец функции LIKE STORIES:\n\nПоставлено лайков: {count_like}\nПоставленно сердечек: {count_super}\nПоставлено Мы вместе: {count_together}\nПролистано: {count_next}\nВсего циклов: {stories + 1}")
+                        bot.send_message(BotID, f"Конец функции LIKE STORIES:\n\nПоставлено лайков: {count_like}\nПоставленно сердечек: {count_super}"
+                                                f"\nПоставлено Мы вместе: {count_together}\nПролистано: {count_next}"
+                                                f"\nВсего циклов: {stories + 1}\nВремя выполнения: <b>{round(time.time() - start_time, 1)} </b>секунд", parse_mode='Html')
                 except Exception as e:
                     logging.debug(e)
                 
@@ -554,7 +630,8 @@ def feed_likes():
     count_super = 0
     count_together = 0
     count_select = 0
-    
+    start_time = time.time()
+
     # основной цикл
     for x_all in range(0, feed_set):
         ActionChains(driver).send_keys(Keys.ESCAPE).perform() #жмем esc чтобы убрать всплывающие окна
@@ -595,16 +672,23 @@ def feed_likes():
         
         if x_all == feed_set - 1:
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Цикл лайков ленты закончен.")
-            print(f"\nНравится: {count_like}\nСупер: {count_super}\nМы вместе: {count_together}\nВсего циклов: {feed_set - 1}\nСделано циклов: {x_all}")
+            print(f"\nНравится: {count_like}\nСупер: {count_super}\nМы вместе: {count_together}\nВсего циклов: {feed_set - 1}"
+                  f"\nСделано циклов: {x_all}\nВремя выполнения: {round(time.time() - start_time, 1)} секунд")
+            print (f"\n\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ожидание...\n")
             logging.info("Цикл лайков ленты закончен")
             try:
                 if API_TOKEN != '0' and BotID != '0' and len(API_TOKEN) > 15 and len(BotID) > 5:
-                    bot.send_message(BotID, f"<b>Конец</b> функции <b>ЛАЙКИ ЛЕНТЫ НОВОСТЕЙ</b>:\nНравится: <b>{count_like}</b>\nСупер: <b>{count_super}</b>\nМы вместе: <b>{count_together}</b>\nСделано циклов: <b>{x_all}</b> из <b>{feed_set - 1}</b>", parse_mode='Html')
+                    bot.send_message(BotID, f"<b>Конец</b> функции <b>ЛАЙКИ ЛЕНТЫ НОВОСТЕЙ</b>:\nНравится: <b>{count_like}</b>"
+                                            f"\nСупер: <b>{count_super}</b>\nМы вместе: <b>{count_together}</b>"
+                                            f"\nСделано циклов: <b>{x_all}</b> из <b>{feed_set - 1}</b>"
+                                            f"\nВремя выполнения: <b>{round(time.time() - start_time, 1)} секунд</b>", parse_mode='Html')
             except Exception as e:
                 logging.debug(e)
             driver.quit()
         
         time.sleep(random.randrange(1,5))
+
+
 
 # Отрыть ini файл
 def open_file():
