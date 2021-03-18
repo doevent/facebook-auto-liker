@@ -355,14 +355,11 @@ def start_stories_fb():
     logging.info('Старт сценария лайков сториес.')
 
     telegram_sendmsg("<b>Старт</b> сценария лайков сториес.")
-
-    driver.get("https://www.facebook.com/")
     
     driver.implicitly_wait(60) # seconds
-    time.sleep(10)
-    wait = WebDriverWait(driver, 60)
+
     
-    time.sleep(random.randrange(15,20))
+    time.sleep(random.randrange(5,10))
     try:
         driver.find_element_by_css_selector("[aria-label='Все истории']").click()
         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка ВСЕ ИСТОРИИ найдена.")
@@ -401,6 +398,7 @@ def stories_button(button, stories=None):
     global next_refrash
     
     wait = WebDriverWait(driver, 3)
+    driver.implicitly_wait(0)
     
     # Отключаем звук на компе
     if button == 'sound':
@@ -415,7 +413,6 @@ def stories_button(button, stories=None):
         try:
             buttonLIKE = driver.find_elements_by_css_selector('[aria-label="Нравится"]')
             for btn_like in buttonLIKE:
-                driver.implicitly_wait(0)  # seconds
                 try:
                     btn_like.click()
                     # print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка лайк - найдена...")
@@ -423,13 +420,13 @@ def stories_button(button, stories=None):
                 except Exception as e:
                     logging.debug('Like button not found')
                     # print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка ЛАЙК не найдена. Ищем дальше...")
+            pass
             count_like = count_like + 1
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
         except Exception as e:
             logging.debug('Error find LIKEButton')
     elif button == 'love':
         try:
-            # wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="2"]'))).click()
             wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Супер"]'))).click()
         except Exception as e:
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
@@ -440,7 +437,6 @@ def stories_button(button, stories=None):
     
     elif button == 'cave':
         try:
-            # wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-reaction="16"]'))).click()
             wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Мы вместе"]'))).click()
         except Exception as e:
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка МЫ ВМЕСТЕ не найдена.\n{e}")
@@ -451,16 +447,14 @@ def stories_button(button, stories=None):
     elif button == 'next':
         # NEXT
         try:
-            wait = WebDriverWait(driver, 3)
+            wait = WebDriverWait(driver, 1)
             wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '''[aria-label='Кнопка "Следующая подборка"']'''))).click()
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Кнопка: Следующая подборка")
-            time.sleep(random.randrange(1,2))
             next_refrash = 0 # clear count error
         except Exception as e:
             try:
                 wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '''[aria-label='Кнопка "Следующая открытка"']'''))).click()
                 print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} Кнопка: Следующая открытка")
-                time.sleep(random.randrange(1,2))
                 next_refrash = 0 # clear count error
             except Exception as e:
                 print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Не найдены обе кнопки NEXT. Обновление...")
@@ -522,7 +516,7 @@ def stories_likes():
                 # print(getms)
                 list_names.append(getms)
                 # print(list_names)
-                print(f'Количество дубликатов: {list_names.count(getms)}')
+                print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Лайкнуто сториес одного человека: {list_names.count(getms)}")
             except Exception as e:
                 print(e)
                 list_names = []
@@ -537,7 +531,7 @@ def stories_likes():
                             find_element_by_css_selector('[role="link"]').find_element_by_tag_name('img').get_attribute(
                             'alt')
                         list_names.append(getms)
-                        print(f'Количество дубликатов: {list_names.count(getms)}')
+                        # print(f'Количество дубликатов: {list_names.count(getms)}')
                     except Exception as e:
                         print(e)
                         list_names = []
@@ -556,10 +550,8 @@ def stories_likes():
                             break
 
                         count_next += 1
-                        print(
-                            f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Цикл № {stories + 1} из {stories_set} ...")
-
-                        print('Больше трех раз. Пропускаем.')
+                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Лайкнуто больше трех раз. Пропускаем.\n")
+                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Цикл № {stories + 1} из {stories_set} ...")
                     else:
                         break
             else:
@@ -570,32 +562,38 @@ def stories_likes():
                 if rnd_like == 1:
                     # Одинарный лайк
                     stories_button('like', stories)
+                    time.sleep(1)
 
                 elif rnd_like == 2:
                     #Одинарный супер
                     stories_button('love', stories)
+                    time.sleep(1)
 
                 elif rnd_like == 3:
                     # Несколько лайков
                     for mkmk in range(0,random.randrange(2,5)):
                         stories_button('like', stories)
+                        time.sleep(1)
 
                 elif rnd_like == 4:
                     # Несколько Супер
                     for mkmk in range(0, random.randrange(2,5)):
                         stories_button('love', stories)
+                        time.sleep(1)
 
                 elif rnd_like == 5:
                     # Лайк + Супер
                     stories_button('like', stories)
                     time.sleep(random.randrange(1,4))
                     stories_button('love', stories)
+                    time.sleep(1)
 
                 elif rnd_like == 6:
                     # Супер + Лайк
                     stories_button('love', stories)
                     time.sleep(random.randrange(1,4))
                     stories_button('like', stories)
+                    time.sleep(1)
 
                 elif rnd_like == 7:
                     # Лайк, супер, мы вместе
@@ -605,10 +603,12 @@ def stories_likes():
                     stories_button('love', stories)
                     time.sleep(random.randrange(2,4))
                     stories_button('cave', stories)
+                    time.sleep(1)
 
                 elif rnd_like == 8:
                     # Мы вместе
                     stories_button('cave', stories)
+                    time.sleep(1)
 
                 # NEXT
                 stories_button('next', stories)
