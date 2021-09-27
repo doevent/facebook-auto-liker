@@ -5,18 +5,18 @@ Facebook likes feeds, likes stories, send message birthday.
 
 Автоматический лайкер новостной ленты, историй и отправка поздравлений с днем рождения.
 
+### Functions EN
+* Likes friends feed
+* Likes stories
+* Send Birthday Messages
+* Run from the command line
+
 ### Функции RU
 * Лайки ленты друзей
 * Лайки историй
 * Поздравления с днем рождения
 * Информирование через телеграм бота
 * Запуск из командной строки (например для запуска через планировщик)
-
-### Functions EN
-* Likes friends feed
-* Likes stories
-* Send Birthday Messages
-* Run from the command line
 
 ### Install
  Python: 
@@ -26,10 +26,10 @@ pip install selenium
 
 ## Settings
 
-#### Настройка параметров
-Настройка осуществляется без графического интерфейса в тестовом формате путем редактивания файла **setting.ini** через текстовый редактор или во встроенном текстовым редакторе.
+#### Settings
+The setting is carried out without a graphical interface in a test format by editing the **setting.ini** file through a text editor or in a built-in text editor.
 
-**chrome_user** - имя пользователя в браузере, если используется. Пример:
+**chrome_user** - username in the browser (optional). Example:
 ```
 chrome_user = andrey
 ```
@@ -93,7 +93,7 @@ FacebookRU.exe birthday
 * Selenium 3.4.0+
 * Chrome driver current test release version 85.0.4183.87 (for other version: [download driver](https://chromedriver.chromium.org/))
 * Chrome current test release 85.0+ (chrome://settings/help)
-* Facebook language: Russian, English
+* Settings Facebook language: Russian, English
 * Switch to New Facebook design
 
 ## Author
