@@ -9,27 +9,21 @@ Facebook likes feeds, likes stories, send message birthday.
 * Лайки ленты друзей
 * Лайки историй
 * Поздравления с днем рождения
-* Встроенный планировщик
 * Информирование через телеграм бота
 * Запуск из командной строки (например для запуска через планировщик)
 
 ### Functions EN
 * Likes friends feed
 * Likes stories
-* Send Happy Birthday Messages
+* Send Birthday Messages
 * Run from the command line
 
 ### Install
  Python: 
 ```
 pip install selenium
-pip install pyTelegramBotAPI
-pip install schedule
 ```
-Windows:
-```
-downloads .exe files
-```
+
 ## Settings
 
 #### Настройка параметров
@@ -39,49 +33,36 @@ downloads .exe files
 ```
 chrome_user = andrey
 ```
-**width** - ширина окна браузера. Пример:
+**width** - width of browser window. Example:
 ```
 width = 1024
 ```
-**height** - высота окна браузера. Пример:
+**height** - height of browser window. Example:
 ```
 height = 720
 ```
-**stories** - количество циклов лайков в сториес  (не рекомендуется большое значение). Пример:
+**stories** - number of cycles of likes in stories (a large value is not recommended). Example:
 ```
 stories = 150
 ```
-**birthday** - максимальное количество циклов поздравлений (не рекомендуется больше 20). Пример:
+**birthday** - maximum number of congratulations cycles (more than 20 is not recommended). Example:
 ```
 birthday = 19
 ```
-**feed** максимальное количество циклов лаков ленты новостей (не рекомендуется большое значение). Пример:
+**feed** maximum number of cycles of news feed varnishes (a large value is not recommended). Example:
 ```
 feed = 300
 ```
-**token** - токен телеграм бота выдается при созаднии бота: BotFather (https://t.me/BotFather) Пример:
+**token** - telegram bot token is issued when the bot is created: BotFather (https://t.me/BotFather) Example:
 ```
 token = 1387036342:AAGm4QWD5vUjH7FgQbejmz1jelfvh1WUDQI
 ```
-**botid** - ваш ID в телеграме (не бота). Можно узнать отправив сообщение боту: getmyid_bot (https://t.me/getmyid_bot). Пример:
+**botid** - your ID in telegram (not bot). You can find out by sending a message to the bot: getmyid_bot (https://t.me/getmyid_bot). Example:
 ```
 botid = 1251879074
 ```
-#### Настройка планировщика 
-**schedule_birthday** - время поздравлений в планировщике. Пример:
-```
-schedule_birthday = 10:00
-```
-**schedule_stories** - время лайков в сториес в планировщике. Пример:
-```
-schedule_stories1 = 10:00
-```
-**schedule_like_feed** - время лайков новостной ленты в планировщике. Пример:
-```
-schedule_like_feed = 15:00
-```
 #### Setting birthday 
-Настройка осуществляется путем редактирования файла **birthday.txt**. Одно поздравление в одну строку, без переносов. Пример:
+Setting is done by editing the file **birthday.txt**. One congratulations on one line, no hyphenation. Example:
 ```
 Happy Birthday!
 Wishing you a Happy Birthday!
