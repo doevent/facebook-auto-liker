@@ -23,7 +23,12 @@ Facebook likes feeds, likes stories, send message birthday.
 ```
 pip install selenium
 ```
-
+```
+Download Chrome driver https://chromedriver.chromium.org/
+```
+```
+Patch chromedriver.exe:  Replacing cdc_ variable ($cdc_asdjflasutopfhvcZLmcfl_)
+```
 ## Settings
 
 #### Settings
@@ -90,9 +95,9 @@ FacebookRU.exe birthday
 ### Compatibility
 * Windows 10, 2019
 * Python 3.7+
-* Selenium 3.4.0+
-* Chrome driver current test release version 85.0.4183.87 (for other version: [download driver](https://chromedriver.chromium.org/))
-* Chrome current test release 85.0+ (chrome://settings/help)
+* Selenium 4.1.0
+* Chrome driver current test release version 90.0.4183.87 (for other version: [download driver](https://chromedriver.chromium.org/))
+* Chrome current test release 90.0+ (chrome://settings/help)
 * Settings Facebook language: Russian, English
 * Switch to New Facebook design
 
