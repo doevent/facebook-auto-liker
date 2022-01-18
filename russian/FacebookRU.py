@@ -15,74 +15,53 @@ from selenium.webdriver.support.ui import Select
 
 import logging
 import configparser
-import tempfile
 import os
-import requests  # проверка версии
 
 import time
 import datetime
 import random
+import requests
 
-import tkinter as tk  # окно
-import argparse  # командная строка
+import tkinter as tk  # create window
+import argparse  # command line
 
 
 log_filename = f'fb_log\\facebook_select_ru-{datetime.datetime.now().strftime("%d-%m-%Y")}.log'
 logging.basicConfig(filename=log_filename, level=logging.INFO, filemode='a', format=' %(asctime)s: %(name)s - %(levelname)s - %(message)s')
 print(log_filename)
 logging.info("==============================================================")
-logging.info("Старт программы")
+logging.info("Start Script")
 
-# Загрузка настроек из ini файла
+# Loading settings from ini file
 try:
     config = configparser.ConfigParser()
     config.read('settings.ini')
-    version = config.get("Settings", "version")  # Текущая версия
-    chrome_user = config.get("Settings", "chrome_user")  # Имя пользователя в браузере Хром
-    width_set = int(config.get("Settings", "width"))  # Ширина окна браузера
-    height_set = int(config.get("Settings", "height"))  # Высота окна браузера сториес
-    images_set = int(config.get("Settings", "images"))  # включает и отключает картинки
-    stories_set = int(config.get("Settings", "stories"))  # количество циклов сториес
-    feed_set = int(config.get("Settings", "feed"))  # количество циклов в ленте друзей
-    feed_select = int(config.get("Settings", "feed_select"))  # релевантные или новые сообщения в ленте
-    API_TOKEN = str(config.get("Settings", "token"))  # Токен телеграм бота
-    BOT_ID = str(config.get("Settings", "botid"))  # ID телеграм бота
-
+    chrome_user = config.get("Settings", "chrome_user")  # Username in Chrome browser
+    width_set = int(config.get("Settings", "width"))  # Browser window width
+    height_set = int(config.get("Settings", "height"))  # Browser window height
+    images_set = int(config.get("Settings", "images"))  # turns pictures on and off
+    stories_set = int(config.get("Settings", "stories"))  # count of cycle stories
+    feed_set = int(config.get("Settings", "feed"))  # count of cycle frends feed
+    feed_select = int(config.get("Settings", "feed_select"))  # relevant or new messages in the feed
+    API_TOKEN = str(config.get("Settings", "token"))  # Token telegram bot
+    BOT_ID = str(config.get("Settings", "botid"))  # Telegram ID of the user to whom to send messages
+    DECTECT_POP = bool((config.get("Birthday", "detect_popup")))  # on\off autodetect popup window
+    DATE_BIRTHDAY = str(config.get("Birthday", "date"))  # ID last date of congratulation
 
 except Exception as e:
-    logging.exception("Ошибка загрузки INI")
-    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка загрузки INI")
-
-# Проверка версии
-r_version = 0
-upd_version = 0
-try:
-    r_version = requests.get('https://cisgender.ru/fb/version.txt')
-    r_version.encoding = 'utf-8' 
-    upd_version = r_version.text
-    # print(f"Текущая версия: {version}\nПоследняя версия: {r_version.text}")
-    logging.info(f"Текущая версия: {version}")
-    if upd_version == version:
-        print(f"Последняя версия установлена: {version}")
-    else:
-        print(f"Последняя версия: {upd_version}")
-except Exception as e:
-    upd_version = "Недоступно"
-    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка проверки версии.")
-    logging.exception('Ошибка проверки версии')
+    logging.exception("INI load error")
+    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> INI load error")
 
 
-driver = 0  # селениум
-# переменные счетчиков сториес
+driver = 0
+# story counter variables
 count_like = 0
 count_super = 0
 count_together = 0
 next_refrash = 0
-print(f"\nТекущая версия: {version}\nПоследняя версия: {upd_version}")
-print(f"\n{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ожидание...\n")
 
 
-# Функция сообщений в телеграм
+# The function of sending messages to telegrams
 def telegram_sendmsg(bot_message):
     try:
         if API_TOKEN != '0' and BOT_ID != '0' and len(API_TOKEN) > 15 and len(BOT_ID) > 5:
@@ -92,37 +71,30 @@ def telegram_sendmsg(bot_message):
         logging.exception(f"Error send message telegram {e}")
 
 
-# Функция Создания окна браузера
+# Browser window creation function
 def start_browser():
     global driver
 
-    # настройки создания окна хрома
+    # chrome window creation settings
     options = webdriver.ChromeOptions()
     options.add_argument("disable-infobars")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
     options.add_argument(f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data\\{chrome_user}")
-    if images_set == 0:  # отключает картинки
+    if images_set == 0:  # disable pictures
         prefs = {"profile.managed_default_content_settings.images": 2}
         options.add_experimental_option("prefs", prefs)
     try:
-        # создаем пустое окно браузера
-        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Создаем окно браузера...")
+        # Create an empty browser window
+        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Create an empty browser window...")
         driver = webdriver.Chrome(options=options)
     except WebDriverException:
-        logging.exception("Ошибка в каталоге TEMP №1.\nВозможно браузер уже запущен.")
-        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в каталоге TEMP.\nВозможно браузер уже запущен.\n{tempfile.gettempdir()}")
-        try:
-            if os.path.exists(tempfile.gettempdir()) == False:
-                logging.warning("Каталог не найден. Создаем новый №2.\n{tempfile.gettempdir()}")
-                os.mkdir(tempfile.gettempdir())
-        except Exception as e:
-            logging.exception("Ошибка создания каталога в TEMP №3.\nВозможно браузер уже запущен.\n{")
-            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка создания каталога в TEMP\n{tempfile.gettempdir()}")
+        logging.exception("Browser is already running.")
+        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Browser is already running.")
     except Exception as e:
-        logging.exception('Ошибка создания окна браузера №4.\nВозможно браузер уже запущен.\n{')
+        logging.exception('Browser is already running.')
 
-    #  Маскировка браузера от фейсбука
+    #  Browser Disguise
     driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
         "source": """
         Object.defineProperty(navigator, 'webdriver', {
@@ -133,7 +105,7 @@ def start_browser():
 
     driver.execute_cdp_cmd("Network.enable", {})
     driver.execute_cdp_cmd("Network.setExtraHTTPHeaders", {"headers": {"User-Agent": "browser1"}})
-    # Конец масикровки
+    # End of Browser Disguise
     driver.set_window_rect(10, 10, width_set, height_set)
     driver.get("https://facebook.com/")
     time.sleep(3)
@@ -144,110 +116,101 @@ def start_browser():
     logging.info(f"Window size: width = {size['width']}px, height = {size['height']}px, x = {position['x']}, y = {position['y']}")
     print(driver.capabilities['browserVersion'])
     logging.info(driver.capabilities['browserVersion'])
-    ActionChains(driver).send_keys(Keys.ESCAPE).perform()  # жмем esc чтобы убрать всплывающие окна
+    ActionChains(driver).send_keys(Keys.ESCAPE).perform()  # press esc to remove pop-ups
     time.sleep(1)
-    ActionChains(driver).send_keys(Keys.ESCAPE).perform()  # жмем esc чтобы убрать всплывающие окна
+    ActionChains(driver).send_keys(Keys.ESCAPE).perform()  # press esc to remove pop-ups
     ActionChains(driver).reset_actions()
 
     try:
-        # Закрываем вкладки
+        # Close tabs
         driver.implicitly_wait(7)
-        count_close = driver.find_elements_by_css_selector('[aria-label="Закрыть чат"]')
-        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено открытых вкладок: {len(count_close)}")
+        count_close = driver.find_elements(By.CSS_SELECTOR, '[aria-label="Закрыть чат"]')
+        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Found open tabs: {len(count_close)}")
         for send_close in count_close:
             send_close.click()
-            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Закрыта вкладка")
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Closed tab")
             time.sleep(5)
             try:
-                driver.find_element_by_css_selector('[aria-label="ОК"]').click()
+                driver.find_elements(By.CSS_SELECTOR, '[aria-label="ОК"]').click()
                 time.sleep(5)
             except Exception as e:
                 logging.debug(e)
     except Exception as e:
         logging.debug(e)
 
+    # automatic detect birthdays pop-ups
+    if DECTECT_POP is True and DATE_BIRTHDAY != str(datetime.date.today()):
+        gift = driver.find_elements(By.CSS_SELECTOR, "[href='/events/birthdays/']")
+        if gift:
+            start_birthday_fb(auto=True)
+            return False
+    return True
+
 
 # -----------------------------------------------------------
-# Старт функции поздравлений
-def start_birthday_fb():
-    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Старт функции поздравлений...")
+# Launch the birthdays function
+def start_birthday_fb(auto: bool=False):
+    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Launch the birthdays function")
 
-    start_browser()
-    logging.info('Старт сценария поздравлений с днем рождения')
-    telegram_sendmsg("<b>Старт</b> сценария поздравлений с днем рождения.")
+    if auto is False:
+        start_browser()
+
+    logging.info('Launch the birthdays function')
+    telegram_sendmsg("<b>Launch</b> the birthdays function")
 
     try:
-        driver.find_element_by_css_selector("[href='/events/birthdays/']").click()
+        driver.find_elements(By.CSS_SELECTOR, "[href='/events/birthdays/']")[0].click()
         time.sleep(random.randrange(15, 20))
-    except Exception as e:
-        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Картинка с подарком не найдена.")
-        logging.warning(f"Картинка с подарком не найдена.\n{e}")
-        birthday_fb_alternative()
+    except IndexError as e:
+        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Gift picture not found.")
+        logging.debug(f"Gift picture not found.\n{e}")
+
+        driver.implicitly_wait(10)  # seconds
+        driver.get("https://www.facebook.com/events/birthdays/")
+        time.sleep(random.randrange(40, 50))
+        birthday_message(var='alt')
     else:
-        try:
-            birthday_message(var="standard")  # Если всё ОК, переходим в функцую отправки сообщений
-        except Exception as e:
-            driver.quit()
-            logging.debug(e)
+        birthday_message(var="standard")  # Go to the function of sending messages
 
 
-# альтернативный сценарий входа в сториес
-def birthday_fb_alternative():
-    logging.info("Включение функции альтернативного сценария сториес")
-
-    driver.get("https://www.facebook.com/events/birthdays/")
-    driver.implicitly_wait(10)  # seconds
-    time.sleep(random.randrange(40, 50))
-    birthday_message(var='alt')
-
-
-# Основная функция отправки поздравлений
+# function of sending birthdays
 def birthday_message(var: str):
     start_time = time.time()
     driver.implicitly_wait(40)  # seconds
-    time.sleep(random.randrange(18, 27))
+    time.sleep(random.randrange(3, 5))
 
-    try:
-        with open("birthday.txt", "r", encoding="utf-8") as f:
-            birthday = f.readlines()
-            
-            count_post = driver.find_elements_by_css_selector('[method="POST"]')
-            len_count = len(count_post)-1
-            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено полей для поздавлений: {len_count}")
+    with open("birthday.txt", "r", encoding="utf-8") as f:
+        birthday = f.readlines()
 
-            count_button = len(driver.find_elements_by_css_selector('[aria-label="Сообщение"]'))
-            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено кнопок СООБЩЕНИЕ (в личку):  {count_button}")
-                
-            logging.info(f'Найдено полей для поздавлений: {len_count}')
-            num_msg = 0  # счетчик отправленных хроник
-            num_button = 0
+        count_post = driver.find_elements(By.CSS_SELECTOR, '[method="POST"]')
+        len_count = len(count_post)-1
+        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено полей для поздавлений: {len_count}")
 
-    except Exception as e:
-        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в блоке поздравлений\n{e}\n")
-        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Прерывание цикла")
-        logging.exception("Ошибка в блоке поздравлений.")
-        try:
-            driver.quit()
-        except Exception as e:
-            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка закрытия браузера...")
+        count_button = len(driver.find_elements(By.CSS_SELECTOR, '[aria-label="Сообщение"]'))
+        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено кнопок СООБЩЕНИЕ (в личку):  {count_button}")
+
+        logging.info(f'Найдено полей для поздавлений: {len_count}')
+        num_msg = 0  # счетчик отправленных хроник
+        num_button = 0
 
     for cv in range(0, 200):  # перебираем элементы и когда элемент окажется тектовым - отправляем поздравление
         ActionChains(driver).send_keys(Keys.TAB).perform()
         element = driver.switch_to.active_element
-        # if element.find_elements_by_tag_name('span'):
+        # if element.find_elements(By.CSS_SELECTOR, 'span'):
         #     print(element.get_attribute("innerHTML"), "\n")
         driver.implicitly_wait(0)
         if len_count == num_msg or len_count == 0 or num_msg >= 19:
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравления в хронике кончились: {num_msg}. Циклов всего: {cv}")
             break
         try:
-            if element.find_element_by_tag_name('br').get_attribute('data-text') == 'true':
+            if element.find_elements(By.TAG_NAME, 'br')[0].get_attribute('data-text') == 'true':
                 try:
-                    cmess = driver.find_elements_by_css_selector('[method="POST"]')
+                    cmess = driver.find_elements(By.CSS_SELECTOR, '[method="POST"]')
                     txt = str(random.choice(birthday).replace("\n", ""))
                     ActionChains(driver).send_keys_to_element(element, txt, Keys.ENTER).perform()
                     num_msg += 1
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравление в хронику №: {num_msg}")
+                    print(
+                        f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравление в хронику №: {num_msg}")
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Текст: {txt}")
                     time.sleep(random.randrange(10, 15))
                     ActionChains(driver).reset_actions()
@@ -256,7 +219,8 @@ def birthday_message(var: str):
                     print(e)
                     logging.info(e)
                 except Exception as e:
-                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в цикле отправления поздравлений. Поздравление №: {num_msg}.\n{e}")
+                    print(
+                        f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в цикле отправления поздравлений. Поздравление №: {num_msg}.\n{e}")
                     logging.exception(f"Ошибка в цикле отправления поздравлений. Поздравление №: {send_msg}.\n{e}")
                     break
 
@@ -275,11 +239,11 @@ def birthday_message(var: str):
 
             driver.implicitly_wait(10)
             driver.get("https://www.facebook.com/events/birthdays/")
-            time.sleep(random.randrange(40, 50))
+            time.sleep(random.randrange(15, 30))
 
         # Поиск кнопки
         try:
-            for msgbut in driver.find_elements_by_css_selector('[aria-label="Сообщение"]'):
+            for msgbut in driver.find_elements(By.CSS_SELECTOR,'[aria-label="Сообщение"]'):
                 if count_button == num_button or count_button == 0 or num_button >= 15:
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Поздравления в личку кончились: {num_button}.")
                     break
@@ -287,13 +251,17 @@ def birthday_message(var: str):
                 try:
                     msgbut.click()
                 except Exception as e:
-                    logging.warning(e)
-                    print(f'Ошибка в клике по кнопке СООБЩЕНИЕ. Пробуем второй способ {e}')
-                    ActionChains(driver).move_to_element(msgbut).click().perform()
+                    break
+                    # print(f'Ошибка в клике по кнопке СООБЩЕНИЕ. Пробуем второй способ {e}')
+                    # logging.info(f'Ошибка в клике по кнопке СООБЩЕНИЕ. Пробуем второй способ {e}')
+                    # ActionChains(driver).move_to_element(msgbut).click().perform()
                 time.sleep(random.randrange(30, 40))
                 try:
                     element = driver.switch_to.active_element
-                    if element.find_elements_by_css_selector('[data-text="true"]'):
+                    # print(element.get_attribute("outerHTML"), "\n")
+                    # print(element.get_attribute("role"))
+                    # print(element.parent)
+                    if element.get_attribute("role") == "textbox":
                         # print(element.get_attribute("innerHTML"), "\n")
                         txt = str(random.choice(birthday).replace("\n", ""))
                         ActionChains(driver).send_keys(txt, Keys.ENTER).perform()
@@ -305,24 +273,32 @@ def birthday_message(var: str):
 
                         driver.implicitly_wait(20)
                         # закрываем вкладки
-                        count_close = driver.find_elements_by_css_selector('[aria-label="Закрыть чат"]')
+                        count_close = driver.find_elements(By.CSS_SELECTOR, '[aria-label="Закрыть чат"]')
 
                         for send_close in count_close:
                             send_close.click()
                             time.sleep(random.randrange(5, 10))
                             try:
-                                driver.find_element_by_css_selector('[aria-label="ОК"]').click()
-                            except NoSuchElementException as e:
+                                driver.find_elements(By.CSS_SELECTOR, '[aria-label="ОК"]')[0].click()
+                            except IndexError as e:
                                 logging.debug(e)
-                        print(f'Закрыто вкладок: {len(count_close)}')
-                        time.sleep(random.randrange(10, 15))
+                        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Закрыто вкладок: {len(count_close)}")
+                        logging.info(f'Закрыто вкладок: {len(count_close)}')
+                        time.sleep(random.randrange(15, 20))
                 except Exception as e:
-                    print(f'Поле сообщений: {e}')
-                    logging.warning(f'Поле сообщений : {e}')
+                    print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в поле личных сообщений: {e}")
+                    logging.exception('Ошибка в поле личных сообщений')
                     break
         except Exception as e:
-            print(e)
-            logging.warning(f"Поздравления в личные сообщения: {e}")
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в личных сообщениях: {e}")
+            logging.warning(f"Ошибка в личных сообщениях: {e}")
+
+    # save date config ini file
+    if DECTECT_POP is True and DATE_BIRTHDAY != str(datetime.date.today()):
+        config.set("Birthday", "date", str(datetime.date.today()))
+        with open('settings.ini', 'w') as configfile:
+            config.write(configfile)
+            print(f"DATE: {DATE_BIRTHDAY} vs {datetime.date.today()}")
 
     logging.info(f'Отправлено поздравлений: {num_msg} из {len_count}')
     print(f"\n\nОправлено поздравлений в хронику: {num_msg} из {len_count}")
@@ -335,7 +311,6 @@ def birthday_message(var: str):
                      f"\nВремя выполнения: <b>{round(time.time() - start_time, 1)}</b> секунд")
 
     try:
-        f.close()
         driver.quit()
     except Exception as e:
         print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка закрытия браузера...")
@@ -345,7 +320,11 @@ def birthday_message(var: str):
 # Начало функций сториес
 def start_stories_fb():
     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Старт функции STORIES...")
-    start_browser()  # создаем окно
+    brow = start_browser()  # создаем окно
+    if brow is False:
+        telegram_sendmsg("Skipping the Stories function.")
+        driver.quit()
+        return None
     logging.info('Старт сценария лайков сториес.')
 
     telegram_sendmsg("<b>Старт</b> сценария лайков <b>STORIES</b>.")
@@ -354,16 +333,22 @@ def start_stories_fb():
 
     time.sleep(random.randrange(5, 10))
     try:
-        driver.find_element_by_css_selector("[aria-label='Все истории']").click()
-        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка ВСЕ ИСТОРИИ найдена.")
-        logging.info("Кнопка ВСЕ ИСТОРИИ НАЙДЕНА.")
-        time.sleep(20)
-
-        stories_likes()
+        hs_button = driver.find_elements(By.CSS_SELECTOR, "[aria-label='Смотреть все истории']")
+        if hs_button:
+            hs_button[0].click()
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка [Смотреть все истории] найдена.")
+            logging.info("Кнопка ВСЕ ИСТОРИИ НАЙДЕНА.")
+            time.sleep(20)
+            stories_likes()
+        else:
+            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Не найдена кнопка '[Смотреть все истории]'. \n{e}")
+            logging.exception("Не найдена кнопка '[Смотреть все истории]'.")
+            driver.quit()
+            return None
 
     except Exception as e:
-        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Не найдена кнопка Все истории \n{e}")
-        logging.exception("Не найдена кнопка 'Все истории'.")
+        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка в кнопке [Смотреть все истории] \n{e}")
+        logging.exception("Ошибка в кнопке [Смотреть все истории].")
         stories_fb_alternative()  # Ищем на странице кнопку, если не найдена, то переходим на альтернатиынй вариант
 
 
@@ -396,30 +381,27 @@ def stories_button(button, stories=None):
     # Отключаем звук на компе
     if button == 'sound':
         try:
-            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Выключить звук"]'))).click()
+            driver.find_elements(By.CSS_SELECTOR, '[aria-label="Выключить звук"]')[0].click()
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Звук выключен")
         except Exception as e:
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка кнопки вкл\выкл звука...\n{e}")
             logging.info("Ошибка кнопки вкл\выкл звука...\n{e}")
     
     elif button == 'like':
-        try:
-            buttonLIKE = driver.find_elements_by_css_selector('[aria-label="Нравится"]')
-            for btn_like in buttonLIKE:
-                try:
-                    btn_like.click()
-                    # print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка лайк - найдена...")
-                    break
-                except Exception as e:
-                    logging.debug('Like button not found')
-                    # print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка ЛАЙК не найдена. Ищем дальше...")
-            count_like = count_like + 1
-            print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
-        except Exception as e:
-            logging.debug('Error find LIKEButton')
+        buttonLIKE = driver.find_elements(By.CSS_SELECTOR, '[aria-label="Нравится"]')
+        for btn_like in buttonLIKE:
+            try:
+                btn_like.click()
+                # print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка лайк - найдена...")
+                break
+            except Exception as e:
+                logging.debug('Like button not found')
+                # print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка ЛАЙК не найдена. Ищем дальше...")
+        count_like = count_like + 1
+        print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> {stories} - ЛАЙК...")
     elif button == 'love':
         try:
-            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Супер"]'))).click()
+            driver.find_elements(By.CSS_SELECTOR, '[aria-label="Супер"]')[0].click()
         except Exception as e:
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка SUPER не найдена.\n{e}")
             logging.info(f"Блок Сториес. Не найдена кнопка SUPER.\n{e}")
@@ -429,7 +411,7 @@ def stories_button(button, stories=None):
     
     elif button == 'cave':
         try:
-            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Мы вместе"]'))).click()
+            driver.find_elements(By.CSS_SELECTOR, '[aria-label="Мы вместе"]')[0].click()
         except Exception as e:
             print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Кнопка МЫ ВМЕСТЕ не найдена.\n{e}")
             logging.info(f"Блок Сториес. Не найдена кнопка МЫ ВМЕСТЕ.\n{e}")
@@ -456,24 +438,22 @@ def stories_button(button, stories=None):
                 
                 print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Обновление окна.")
                 logging.info('Refresh browser. No button NEXT')
-                driver.refresh()
+                driver.get("https://www.facebook.com/stories")
                 time.sleep(random.randrange(10, 15))
                 # перемещаемся по ссылкам на сториес человека
                 try:
-                    driver.find_element_by_link_text('Воспроизвести все').click()
-                except NoSuchElementException:
-                    ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB,
-                                                   Keys.TAB).perform()  # нужны три таба, но плюс один когда есть своя сториес.
-                    time.sleep(random.randrange(5, 8))
-                    ActionChains(driver).send_keys(Keys.RETURN).perform()
+                    driver.find_elements(By.LINK_TEXT, 'Воспроизвести все')[0].click()
+                except Exception as e:
+                    logging.exception("no found text link")
+                    driver.quit()
 
                 time.sleep(random.randrange(4, 8))
                 try:
-                    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[aria-label="Выключить звук"]'))).click()
+                    driver.find_elements(By.CSS_SELECTOR, '[aria-label="Выключить звук"]')[0].click()
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Звук выключен")
                 except Exception as e:
                     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Ошибка кнопки вкл\выкл звука...\n{e}")
-                    logging.info("Ошибка кнопки вкл\выкл звука...\n{e}")
+                    logging.info(f"Ошибка кнопки вкл\выкл звука...\n{e}")
 
 
 # основная функция лайков сториес
@@ -487,7 +467,8 @@ def stories_likes():
     driver.implicitly_wait(30)  # seconds
 
     try:
-        driver.find_element_by_link_text('Воспроизвести все').click()
+        driver.find_elements(By.LINK_TEXT, 'Воспроизвести все')[0].click()
+        print('Кнопка "Воспроизвести все" найдена.')
     except NoSuchElementException:
         print('Кнопка "Воспроизвести все" не найдена.')
         ActionChains(driver).send_keys(Keys.TAB, Keys.TAB, Keys.TAB,
@@ -504,17 +485,17 @@ def stories_likes():
 
             # Находим имя и добавляем в список
             try:
-                getms = driver.find_element_by_css_selector('[data-pagelet="StoriesContentPane"]').find_elements_by_tag_name('img')
+                getms = driver.find_elements(By.CSS_SELECTOR, '[data-pagelet="StoriesContentPane"]')[0].find_elements(By.TAG_NAME, 'img')
                 for x in getms:
                     try:
                         if x.get_attribute('height') == "40" and x.get_attribute('width') == "40":
                             # print(x.get_attribute('alt'))
                             getms = x.get_attribute('alt')
                             break
-                    except:
+                    except Exception as e:
                         getms = None
                         # list_names = []
-                        print("Не определилось имя...")
+                        print(f"Не определилось имя...\n{e}")
                 print(getms)
                 list_names.append(getms)
                 # print(list_names)
@@ -530,15 +511,14 @@ def stories_likes():
                 for xm in range(0, 20):
 
                     try:
-                        getms = driver.find_element_by_css_selector(
-                            '[data-pagelet="StoriesContentPane"]').find_elements_by_tag_name('img')
+                        getms = driver.find_elements(By.CSS_SELECTOR, '[data-pagelet="StoriesContentPane"]')[0].find_elements(By.TAG_NAME, 'img')
                         for x in getms:
                             if x.get_attribute('height') == "40" and x.get_attribute('width') == "40":
                                 # print(x.get_attribute('alt'))
                                 getms = x.get_attribute('alt')
                                 break
                     except Exception as e:
-                        print("Не определилось имя...")
+                        print(f"Не определилось имя в пропуске... {e}")
                         list_names = []
                         getms = None
 
@@ -649,8 +629,12 @@ def start_feed_likes():
     logging.info("Старт сценария лайков ленты новостей.")
 
     print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Старт функции LIKES FEED...")
-    
-    start_browser()
+
+    brow = start_browser()  # создаем окно
+    if brow is False:
+        telegram_sendmsg("Skipping the likes feed function.")
+        driver.quit()
+        return None
     telegram_sendmsg("<b>Старт</b> сценария лайков ленты новостей.")
 
     if feed_select != 0:
@@ -683,14 +667,14 @@ def feed_likes():
             element = driver.switch_to.active_element
 
             # print(element.get_attribute("innerHTML"), "\n")
-            if element.find_elements_by_css_selector('[dir="ltr"]'):
+            if element.find_elements(By.CSS_SELECTOR, '[dir="ltr"]'):
                 print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдено сообщество. Пропускаем...")
                 count_group += 1
-            elif element.find_elements_by_css_selector('[aria-label="Реклама"]'):
+            elif element.find_elements(By.CSS_SELECTOR, '[aria-label="Реклама"]'):
                 print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Найдена реклама. Пропускаем...")
                 count_ad += 1
                 time.sleep(random.randrange(3, 6))
-            elif element.find_elements_by_css_selector('[aria-label="Нравится"]'):
+            elif element.find_elements(By.CSS_SELECTOR, '[aria-label="Нравится"]'):
                 print(f"{datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')} >> Пост найден. Лайкаем...")
 
                 time.sleep(random.randrange(6, 10))
@@ -789,7 +773,6 @@ button3 = tk.Button(fr_buttons, text="Поздравления с ДР", bg="pur
 
 label1 = tk.Label(fr_buttons,  text=f"Настройки бота\n")
 label2 = tk.Label(fr_buttons,  text=f"\nФункции бота\n")
-label3 = tk.Label(fr_buttons,  text=f"\n\nТекущая версия: {version}\nПоследняя версия: {upd_version}")
 label4 = tk.Label(fr_buttons,  text=f"\n\nЭта программа написана для тестов\nбраузера на примере facebook."
                                     f"\nИспользуйте на свой страх и риск.\nАвтор не несет ответственности за"
                                     f"\nущерб от данной программы.")
@@ -806,7 +789,6 @@ txt_edit.grid(row=0, column=1, sticky="nsew")
 button1.grid(row=4, column=0)
 button2.grid(row=5, column=0)
 button3.grid(row=6, column=0)
-label3.grid(row=7, column=0)
 site_link.grid(row=8, column=0)
 site_link.insert(0, 'https://github.com/doevent/facebook-auto-liker')
 label4.grid(row=9, column=0)
@@ -823,6 +805,6 @@ if __name__ == "__main__":
     elif namespace.name == 'feed':
         start_feed_likes()
     elif namespace.name == 'birthday':
-        start_birthday_fb()
+        start_birthday_fb(auto=False)
     else:
         window.mainloop()
